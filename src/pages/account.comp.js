@@ -268,11 +268,11 @@ export function Account() {
 
   useEffect(()=>{
     loadFilteredMoments(moments)
-  }, [searchMoments])
+  }, [searchMoments, searchMomentsType])
 
   useEffect(()=>{
     loadFilteredListings(listings)
-  }, [searchListings])
+  }, [searchListings, searchListingsType])
 
   const handleSearchMomentChange = (e) => {
     setSearchMoments(e.target.value)
