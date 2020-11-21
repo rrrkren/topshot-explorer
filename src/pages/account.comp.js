@@ -203,7 +203,7 @@ export function Account() {
     getMoments(address, momentIDs)
       .then((m) => {
         setMoments(m)
-        setFilteredMoments(m)
+        loadFilteredMoments(m)
       })
       .catch(setError)
   }, [address, momentIDs])
@@ -214,7 +214,7 @@ export function Account() {
     getListings(address, saleMomentIDs)
       .then((l) => {
         setListings(l)
-        setFilteredListings(l)
+        loadFilteredListings(l)
       })
       .catch(setError)
   }, [address, saleMomentIDs])
@@ -230,39 +230,56 @@ export function Account() {
   }
 
   // add search
-  const [searchMomentsType, setSearchMomentsType] = useState(null)
-  const [searchListingsType, setSearchListingsType] = useState(null)
+  const [searchMoments, setSearchMoments] = useState("")
+  const [searchListings, setSearchListings] = useState("")
+  const [searchMomentsType, setSearchMomentsType] = useState("id")
+  const [searchListingsType, setSearchListingsType] = useState("id")
 
-  const handleSearchMomentChange = (e) => {
-    let value = e.target.value
-    if(value == ""){
-      setFilteredMoments(moments)
+
+  const loadFilteredMoments = (m)=>{
+    if(searchMoments == ""){
+      setFilteredMoments(m)
       return
     }
     let fMoments = []
-    moments.map(moment=>{
+    m.map(moment=>{
       const element = (searchMomentsType == "playName") ? moment.play.FullName : moment[searchMomentsType]
-      if (element.toString().toLowerCase().startsWith(value.toLowerCase())){
+      if (element.toString().toLowerCase().startsWith(searchMoments.toLowerCase())){
         fMoments.push(moment)
       }
     })
     setFilteredMoments(fMoments)
   }
 
-  const handleSearchListingChange = (e) => {
-    let value = e.target.value
-    if(value == ""){
-      setFilteredListings(listings)
+  const loadFilteredListings = (l)=>{
+    if(searchListings == ""){
+      setFilteredListings(l)
       return
     }
     let fListings = []
-    listings.map(listing=>{
+    l.map(listing=>{
       const element = (searchListingsType == "playName") ? listing.play.FullName : listing[searchListingsType]
-      if (element.toString().toLowerCase().startsWith(value.toLowerCase())){
+      if (element.toString().toLowerCase().startsWith(searchListings.toLowerCase())){
         fListings.push(listing)
       }
     })
     setFilteredListings(fListings)
+  }
+
+  useEffect(()=>{
+    loadFilteredMoments(moments)
+  }, [searchMoments])
+
+  useEffect(()=>{
+    loadFilteredListings(listings)
+  }, [searchListings])
+
+  const handleSearchMomentChange = (e) => {
+    setSearchMoments(e.target.value)
+  }
+
+  const handleSearchListingChange = (e) => {
+    setSearchListings(e.target.value)
   }
 
   
@@ -306,13 +323,13 @@ export function Account() {
           <span>Moments</span>
           <Muted> {topshotAccount && topshotAccount.momentIDs.length}</Muted>
           <Span>Search By:</Span>
-          <Select onChange={(e)=>{setSearchMomentsType(e.target.value)}}>
+          <Select onChange={(e)=>{setSearchMomentsType(e.target.value)}} value={searchMomentsType}>
             <option value="id">ID</option>
             <option value="setName">Set Name</option>
             <option value="playName">Play Name</option>
             <option value="serialNumber">Serial Number</option>
           </Select>
-          <Input type="text" onChange={handleSearchMomentChange}/>
+          <Input type="text" value={searchMoments} onChange={handleSearchMomentChange}/>
         </h3>
         {/* <MomentList></MomentList> */}
 
@@ -371,14 +388,14 @@ export function Account() {
           <span>Listings</span>
           <Muted> {topshotAccount && topshotAccount.saleMomentIDs.length}</Muted>
           <Span>Search By:</Span>
-          <Select onChange={(e)=>{setSearchListingsType(e.target.value)}}>
+          <Select onChange={(e)=>{setSearchListingsType(e.target.value)}} value={searchListingsType}>
             <option value="id">ID</option>
             <option value="setName">Set Name</option>
             <option value="playName">Play Name</option>
             <option value="serialNumber">Serial Number</option>
             <option value="price">Price</option>
           </Select>
-          <Input type="text" onChange={handleSearchListingChange}/>
+          <Input type="text" value={searchListings} onChange={handleSearchListingChange}/>
         </h3>
         {filteredListings && !!filteredListings.length && (
           <div>
