@@ -149,6 +149,30 @@ const Muted = styled.span`
 
 const H1 = styled.h1``
 
+const Select = styled.select`
+  margin-left: 20px;
+  height: 30px;
+  font-size: 18px;
+  border-radius: 15px;
+  border-color: grey;
+  padding-left: 5px;
+`
+
+const Input = styled.input`
+  margin-left: 20px;
+  height: 30px;
+  font-size: 18px;
+  border-radius: 15px;
+  border-color: grey;
+  border-width: 1px;
+  padding-left: 5px;
+`
+
+const Span = styled.span`
+  margin-left: 20px;
+  font-size: 18px;
+`
+
 export function Account() {
   const {address} = useParams()
   const [acct, setAcct] = useState(null)
@@ -173,20 +197,24 @@ export function Account() {
     getAccount(address).then(setAcct).catch(setError)
   }, [address])
 
-  const [moments, setMoments] = useState(null)
+  const [moments, setMoments] = useState([])
+  const [filteredMoments, setFilteredMoments] = useState([])
   useEffect(() => {
     getMoments(address, momentIDs)
       .then((m) => {
         setMoments(m)
+        setFilteredMoments(m)
       })
       .catch(setError)
   }, [address, momentIDs])
 
-  const [listings, setListings] = useState(null)
+  const [listings, setListings] = useState([])
+  const [filteredListings, setFilteredListings] = useState([])
   useEffect(() => {
     getListings(address, saleMomentIDs)
       .then((l) => {
         setListings(l)
+        setFilteredListings(l)
       })
       .catch(setError)
   }, [address, saleMomentIDs])
@@ -200,6 +228,44 @@ export function Account() {
     let mIDs = topshotAccount.saleMomentIDs.slice(data.selected * 20, data.selected * 20 + 20)
     setSaleMomentIDs(mIDs)
   }
+
+  // add search
+  const [searchMomentsType, setSearchMomentsType] = useState(null)
+  const [searchListingsType, setSearchListingsType] = useState(null)
+
+  const handleSearchMomentChange = (e) => {
+    let value = e.target.value
+    if(value == ""){
+      setFilteredMoments(moments)
+      return
+    }
+    let fMoments = []
+    moments.map(moment=>{
+      const element = (searchMomentsType == "playName") ? moment.play.FullName : moment[searchMomentsType]
+      if (element.toString().toLowerCase().startsWith(value.toLowerCase())){
+        fMoments.push(moment)
+      }
+    })
+    setFilteredMoments(fMoments)
+  }
+
+  const handleSearchListingChange = (e) => {
+    let value = e.target.value
+    if(value == ""){
+      setFilteredListings(listings)
+      return
+    }
+    let fListings = []
+    listings.map(listing=>{
+      const element = (searchListingsType == "playName") ? listing.play.FullName : listing[searchListingsType]
+      if (element.toString().toLowerCase().startsWith(value.toLowerCase())){
+        fListings.push(listing)
+      }
+    })
+    setFilteredListings(fListings)
+  }
+
+  
   if (error != null)
     return (
       <Root>
@@ -239,10 +305,18 @@ export function Account() {
         <h3>
           <span>Moments</span>
           <Muted> {topshotAccount && topshotAccount.momentIDs.length}</Muted>
+          <Span>Search By:</Span>
+          <Select onChange={(e)=>{setSearchMomentsType(e.target.value)}}>
+            <option value="id">ID</option>
+            <option value="setName">Set Name</option>
+            <option value="playName">Play Name</option>
+            <option value="serialNumber">Serial Number</option>
+          </Select>
+          <Input type="text" onChange={handleSearchMomentChange}/>
         </h3>
         {/* <MomentList></MomentList> */}
 
-        {moments && !!moments.length && (
+        {filteredMoments && !!filteredMoments.length && (
           <div>
             <Table striped bordered hover size="sm">
               <thead>
@@ -254,7 +328,7 @@ export function Account() {
                 </tr>
               </thead>
               <tbody>
-                {moments
+                {filteredMoments
                   .sort((a, b) => {
                     return a.setName === b.setName ? 0 : +(a.setName > b.setName) || -1
                   })
@@ -296,8 +370,17 @@ export function Account() {
         <h3>
           <span>Listings</span>
           <Muted> {topshotAccount && topshotAccount.saleMomentIDs.length}</Muted>
+          <Span>Search By:</Span>
+          <Select onChange={(e)=>{setSearchListingsType(e.target.value)}}>
+            <option value="id">ID</option>
+            <option value="setName">Set Name</option>
+            <option value="playName">Play Name</option>
+            <option value="serialNumber">Serial Number</option>
+            <option value="price">Price</option>
+          </Select>
+          <Input type="text" onChange={handleSearchListingChange}/>
         </h3>
-        {listings && !!listings.length && (
+        {filteredListings && !!filteredListings.length && (
           <div>
             <Table striped bordered hover size="sm">
               <thead>
@@ -310,7 +393,7 @@ export function Account() {
                 </tr>
               </thead>
               <tbody>
-                {listings
+                {filteredListings
                   .sort((a, b) => {
                     return a.setName === b.setName ? 0 : +(a.setName > b.setName) || -1
                   })
