@@ -20,7 +20,6 @@ const getTopshotAccount = async (address) => {
   pub struct TopshotAccount {
     pub var momentIDs: [UInt64]
     pub var saleMomentIDs: [UInt64]
-
     init(momentIDs: [UInt64], saleMomentIDs: [UInt64]) {
       self.momentIDs = momentIDs
       self.saleMomentIDs = saleMomentIDs
@@ -31,14 +30,12 @@ const getTopshotAccount = async (address) => {
   let collectionRef = acct.getCapability(/public/MomentCollection)!
                 .borrow<&{TopShot.MomentCollectionPublic}>()!
   let momentIDs = collectionRef.getIDs()
-
   var saleMomentIDs: [UInt64] = []
   let salePublic = acct.getCapability(/public/topshotSaleCollection)
   if salePublic!.check<&{Market.SalePublic}>(){
     let saleCollectionRef = salePublic!.borrow<&{Market.SalePublic}>() ?? panic("Could not borrow capability from public collection")
     saleMomentIDs = saleCollectionRef.getIDs()  
   }
-
   return TopshotAccount(momentIDs: momentIDs, saleMomentIDs: saleMomentIDs)
 }  `,
   ])
@@ -149,36 +146,10 @@ const Muted = styled.span`
 
 const H1 = styled.h1``
 
-const Button = styled.button`
-  margin-left: 20px;
-  height: 30px;
-  font-size: 18px;
-  border-radius: 15px;
-  border-color: grey;
-  border-width: 1px;
-`
-
-const Input = styled.input`
-  margin-left: 20px;
-  height: 30px;
-  font-size: 18px;
-  border-radius: 15px;
-  border-color: grey;
-  border-width: 1px;
-  padding-left: 5px;
-`
-
-const Span = styled.span`
-  margin-left: 20px;
-  font-size: 18px;
-`
-
 export function Account() {
   const {address} = useParams()
   const [acct, setAcct] = useState(null)
   const [error, setError] = useState(null)
-  const [momentError, setMomentError] = useState(null)
-  const [listingError, setListingError] = useState(null)
   const [topshotAccount, setTopShotAccount] = useState(null)
 
   const [momentIDs, setMomentIDs] = useState([])
@@ -205,7 +176,7 @@ export function Account() {
       .then((m) => {
         setMoments(m)
       })
-      .catch(setMomentError)
+      .catch(setError)
   }, [address, momentIDs])
 
   const [listings, setListings] = useState(null)
@@ -214,7 +185,7 @@ export function Account() {
       .then((l) => {
         setListings(l)
       })
-      .catch(setListingError)
+      .catch(setError)
   }, [address, saleMomentIDs])
 
   const handlePageClick = function (data) {
@@ -226,51 +197,6 @@ export function Account() {
     let mIDs = topshotAccount.saleMomentIDs.slice(data.selected * 20, data.selected * 20 + 20)
     setSaleMomentIDs(mIDs)
   }
-
-  // add search
-  const [searchMomentID, setSearchMomentID] = useState(null)
-  const [searchListingID, setSearchListingID] = useState(null)
-
-  const handleSearchMomentChange = (e) => {
-    setSearchMomentID(e.target.value)
-  }
-
-  const handleSearchListingChange = (e) => {
-    setSearchListingID(e.target.value)
-  }
-
-  const handleSearchMoment = ()=>{
-    setMomentError(null)
-    if(searchMomentID == null || searchMomentID == ""){
-      setMomentIDs(topshotAccount.momentIDs.slice(0, 20))
-      return
-    }
-    let value = parseInt(searchMomentID)
-    //search the list of momentIDs
-    if(!topshotAccount.momentIDs.includes(value)){
-      setMomentError("")
-      setMoments([])
-      return
-    }
-    setMomentIDs([value])
-  }
-  const handleSearchListing = ()=>{
-    setListingError(null)
-    if(searchListingID == null || searchListingID == ""){
-      setSaleMomentIDs(topshotAccount.saleMomentIDs.slice(0, 20))
-      return
-    }
-    let value = parseInt(searchListingID)
-    //search the list of saleMomentIDs
-    if(!topshotAccount.saleMomentIDs.includes(value)){
-      setListingError("")
-      setListings([])
-      return
-    }
-    setSaleMomentIDs([value])
-  }
-
-  
   if (error != null)
     return (
       <Root>
@@ -310,17 +236,10 @@ export function Account() {
         <h3>
           <span>Moments</span>
           <Muted> {topshotAccount && topshotAccount.momentIDs.length}</Muted>
-          <Span>Search By ID:</Span>
-          <Input type="text" onChange={handleSearchMomentChange}/>
-          <Button onClick={handleSearchMoment}>Search</Button>
         </h3>
         {/* <MomentList></MomentList> */}
-        {
-          momentError != null && <ul>
-            <li>MomentID doesn't exist for user</li>
-          </ul>
-        }
-        {moments && !!moments.length && momentError == null && (
+
+        {moments && !!moments.length && (
           <div>
             <Table striped bordered hover size="sm">
               <thead>
@@ -359,7 +278,7 @@ export function Account() {
               pageLinkClassName="page-link"
               previousLinkClassName="page-link"
               nextLinkClassName="page-link"
-              pageCount={momentIDs.length == 1 ? 1 : topshotAccount ? topshotAccount.momentIDs.length / 20 : 0}
+              pageCount={topshotAccount ? topshotAccount.momentIDs.length / 20 : 0}
               marginPagesDisplayed={2}
               pageRangeDisplayed={5}
               onPageChange={handlePageClick}
@@ -374,16 +293,8 @@ export function Account() {
         <h3>
           <span>Listings</span>
           <Muted> {topshotAccount && topshotAccount.saleMomentIDs.length}</Muted>
-          <Span>Search By ID:</Span>
-          <Input type="text" onChange={handleSearchListingChange}/>
-          <Button onClick={handleSearchListing}>Search</Button>
         </h3>
-        {
-          listingError != null && <ul>
-            <li>SaleMomentID doesn't exist for user</li>
-          </ul>
-        }
-        {listings && !!listings.length && listingError == null && (
+        {listings && !!listings.length && (
           <div>
             <Table striped bordered hover size="sm">
               <thead>
@@ -424,7 +335,7 @@ export function Account() {
               pageLinkClassName="page-link"
               previousLinkClassName="page-link"
               nextLinkClassName="page-link"
-              pageCount={saleMomentIDs.length == 1 ? 1 : topshotAccount ? topshotAccount.saleMomentIDs.length / 20 : 0}
+              pageCount={topshotAccount ? topshotAccount.saleMomentIDs.length / 20 : 0}
               marginPagesDisplayed={2}
               pageRangeDisplayed={5}
               onPageChange={handleSalePageClick}
