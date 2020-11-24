@@ -120,6 +120,7 @@ export function TopShot() {
           ❤️
         </span>{" "}
         on <a href="https://www.onflow.org/" target="_blank" rel="noopener noreferrer">flow</a> 
+        <br/>
         open sourced <a href="https://github.com/rrrkren/topshot-explorer" target="_blank" rel="noopener noreferrer">here</a>, PRs welcome!
       </p>
     </Root>
