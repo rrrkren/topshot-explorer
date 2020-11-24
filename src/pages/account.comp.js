@@ -247,8 +247,8 @@ export function Account() {
     }
     let value = parseInt(searchMomentID)
     //search the list of momentIDs
-    if(topshotAccount.momentIDs.includes(value)){
-      setMomentError()
+    if(!topshotAccount.momentIDs.includes(value)){
+      setMomentError("")
       setMoments([])
       return
     }
@@ -262,8 +262,8 @@ export function Account() {
     }
     let value = parseInt(searchListingID)
     //search the list of saleMomentIDs
-    if(topshotAccount.saleMomentIDs.includes(value)){
-      setListingError()
+    if(!topshotAccount.saleMomentIDs.includes(value)){
+      setListingError("")
       setListings([])
       return
     }
