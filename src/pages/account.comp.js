@@ -241,7 +241,7 @@ export function Account() {
 
   const handleSearchMoment = ()=>{
     setMomentError(null)
-    if(searchMomentID == null || searchMomentID == ""){
+    if(searchMomentID === null || searchMomentID === ""){
       setMomentIDs(topshotAccount.momentIDs.slice(0, 20))
       return
     }
@@ -256,7 +256,7 @@ export function Account() {
   }
   const handleSearchListing = ()=>{
     setListingError(null)
-    if(searchListingID == null || searchListingID == ""){
+    if(searchListingID === null || searchListingID === ""){
       setSaleMomentIDs(topshotAccount.saleMomentIDs.slice(0, 20))
       return
     }
@@ -359,7 +359,7 @@ export function Account() {
               pageLinkClassName="page-link"
               previousLinkClassName="page-link"
               nextLinkClassName="page-link"
-              pageCount={momentIDs.length == 1 ? 1 : topshotAccount ? topshotAccount.momentIDs.length / 20 : 0}
+              pageCount={momentIDs.length === 1 ? 1 : topshotAccount ? topshotAccount.momentIDs.length / 20 : 0}
               marginPagesDisplayed={2}
               pageRangeDisplayed={5}
               onPageChange={handlePageClick}
@@ -424,7 +424,7 @@ export function Account() {
               pageLinkClassName="page-link"
               previousLinkClassName="page-link"
               nextLinkClassName="page-link"
-              pageCount={saleMomentIDs.length == 1 ? 1 : topshotAccount ? topshotAccount.saleMomentIDs.length / 20 : 0}
+              pageCount={saleMomentIDs.length === 1 ? 1 : topshotAccount ? topshotAccount.saleMomentIDs.length / 20 : 0}
               marginPagesDisplayed={2}
               pageRangeDisplayed={5}
               onPageChange={handleSalePageClick}
