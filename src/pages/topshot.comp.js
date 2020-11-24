@@ -119,7 +119,9 @@ export function TopShot() {
         <span role="img" aria-labelledby="heart">
           ❤️
         </span>{" "}
-        on <a href="https://www.onflow.org/" target="_blank" rel="noopener noreferrer">flow</a> by <a href="https://github.com/rrrkren" target="_blank" rel="noopener noreferrer">rrrkren</a>
+        on <a href="https://www.onflow.org/" target="_blank" rel="noopener noreferrer">flow</a> 
+        <br/>
+        open sourced <a href="https://github.com/rrrkren/topshot-explorer" target="_blank" rel="noopener noreferrer">here</a>, PRs welcome!
       </p>
     </Root>
   )

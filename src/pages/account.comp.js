@@ -149,13 +149,13 @@ const Muted = styled.span`
 
 const H1 = styled.h1``
 
-const Select = styled.select`
+const Button = styled.button`
   margin-left: 20px;
   height: 30px;
   font-size: 18px;
   border-radius: 15px;
   border-color: grey;
-  padding-left: 5px;
+  border-width: 1px;
 `
 
 const Input = styled.input`
@@ -177,6 +177,8 @@ export function Account() {
   const {address} = useParams()
   const [acct, setAcct] = useState(null)
   const [error, setError] = useState(null)
+  const [momentError, setMomentError] = useState(null)
+  const [listingError, setListingError] = useState(null)
   const [topshotAccount, setTopShotAccount] = useState(null)
 
   const [momentIDs, setMomentIDs] = useState([])
@@ -197,26 +199,22 @@ export function Account() {
     getAccount(address).then(setAcct).catch(setError)
   }, [address])
 
-  const [moments, setMoments] = useState([])
-  const [filteredMoments, setFilteredMoments] = useState([])
+  const [moments, setMoments] = useState(null)
   useEffect(() => {
     getMoments(address, momentIDs)
       .then((m) => {
         setMoments(m)
-        loadFilteredMoments(m)
       })
-      .catch(setError)
+      .catch(setMomentError)
   }, [address, momentIDs])
 
-  const [listings, setListings] = useState([])
-  const [filteredListings, setFilteredListings] = useState([])
+  const [listings, setListings] = useState(null)
   useEffect(() => {
     getListings(address, saleMomentIDs)
       .then((l) => {
         setListings(l)
-        loadFilteredListings(l)
       })
-      .catch(setError)
+      .catch(setListingError)
   }, [address, saleMomentIDs])
 
   const handlePageClick = function (data) {
@@ -230,56 +228,46 @@ export function Account() {
   }
 
   // add search
-  const [searchMoments, setSearchMoments] = useState("")
-  const [searchListings, setSearchListings] = useState("")
-  const [searchMomentsType, setSearchMomentsType] = useState("id")
-  const [searchListingsType, setSearchListingsType] = useState("id")
-
-
-  const loadFilteredMoments = (m)=>{
-    if(searchMoments == ""){
-      setFilteredMoments(m)
-      return
-    }
-    let fMoments = []
-    m.map(moment=>{
-      const element = (searchMomentsType == "playName") ? moment.play.FullName : moment[searchMomentsType]
-      if (element.toString().toLowerCase().startsWith(searchMoments.toLowerCase())){
-        fMoments.push(moment)
-      }
-    })
-    setFilteredMoments(fMoments)
-  }
-
-  const loadFilteredListings = (l)=>{
-    if(searchListings == ""){
-      setFilteredListings(l)
-      return
-    }
-    let fListings = []
-    l.map(listing=>{
-      const element = (searchListingsType == "playName") ? listing.play.FullName : listing[searchListingsType]
-      if (element.toString().toLowerCase().startsWith(searchListings.toLowerCase())){
-        fListings.push(listing)
-      }
-    })
-    setFilteredListings(fListings)
-  }
-
-  useEffect(()=>{
-    loadFilteredMoments(moments)
-  }, [searchMoments, searchMomentsType])
-
-  useEffect(()=>{
-    loadFilteredListings(listings)
-  }, [searchListings, searchListingsType])
+  const [searchMomentID, setSearchMomentID] = useState(null)
+  const [searchListingID, setSearchListingID] = useState(null)
 
   const handleSearchMomentChange = (e) => {
-    setSearchMoments(e.target.value)
+    setSearchMomentID(e.target.value)
   }
 
   const handleSearchListingChange = (e) => {
-    setSearchListings(e.target.value)
+    setSearchListingID(e.target.value)
+  }
+
+  const handleSearchMoment = ()=>{
+    setMomentError(null)
+    if(searchMomentID === null || searchMomentID === ""){
+      setMomentIDs(topshotAccount.momentIDs.slice(0, 20))
+      return
+    }
+    let value = parseInt(searchMomentID)
+    //search the list of momentIDs
+    if(!topshotAccount.momentIDs.includes(value)){
+      setMomentError("")
+      setMoments([])
+      return
+    }
+    setMomentIDs([value])
+  }
+  const handleSearchListing = ()=>{
+    setListingError(null)
+    if(searchListingID === null || searchListingID === ""){
+      setSaleMomentIDs(topshotAccount.saleMomentIDs.slice(0, 20))
+      return
+    }
+    let value = parseInt(searchListingID)
+    //search the list of saleMomentIDs
+    if(!topshotAccount.saleMomentIDs.includes(value)){
+      setListingError("")
+      setListings([])
+      return
+    }
+    setSaleMomentIDs([value])
   }
 
   
@@ -322,18 +310,17 @@ export function Account() {
         <h3>
           <span>Moments</span>
           <Muted> {topshotAccount && topshotAccount.momentIDs.length}</Muted>
-          <Span>Search By:</Span>
-          <Select onChange={(e)=>{setSearchMomentsType(e.target.value)}} value={searchMomentsType}>
-            <option value="id">ID</option>
-            <option value="setName">Set Name</option>
-            <option value="playName">Play Name</option>
-            <option value="serialNumber">Serial Number</option>
-          </Select>
-          <Input type="text" value={searchMoments} onChange={handleSearchMomentChange}/>
+          <Span>Search By ID:</Span>
+          <Input type="text" onChange={handleSearchMomentChange}/>
+          <Button onClick={handleSearchMoment}>Search</Button>
         </h3>
         {/* <MomentList></MomentList> */}
-
-        {filteredMoments && !!filteredMoments.length && (
+        {
+          momentError != null && <ul>
+            <li>MomentID doesn't exist for user</li>
+          </ul>
+        }
+        {moments && !!moments.length && momentError == null && (
           <div>
             <Table striped bordered hover size="sm">
               <thead>
@@ -345,7 +332,7 @@ export function Account() {
                 </tr>
               </thead>
               <tbody>
-                {filteredMoments
+                {moments
                   .sort((a, b) => {
                     return a.setName === b.setName ? 0 : +(a.setName > b.setName) || -1
                   })
@@ -372,7 +359,7 @@ export function Account() {
               pageLinkClassName="page-link"
               previousLinkClassName="page-link"
               nextLinkClassName="page-link"
-              pageCount={topshotAccount ? topshotAccount.momentIDs.length / 20 : 0}
+              pageCount={momentIDs.length === 1 ? 1 : topshotAccount ? topshotAccount.momentIDs.length / 20 : 0}
               marginPagesDisplayed={2}
               pageRangeDisplayed={5}
               onPageChange={handlePageClick}
@@ -387,17 +374,16 @@ export function Account() {
         <h3>
           <span>Listings</span>
           <Muted> {topshotAccount && topshotAccount.saleMomentIDs.length}</Muted>
-          <Span>Search By:</Span>
-          <Select onChange={(e)=>{setSearchListingsType(e.target.value)}} value={searchListingsType}>
-            <option value="id">ID</option>
-            <option value="setName">Set Name</option>
-            <option value="playName">Play Name</option>
-            <option value="serialNumber">Serial Number</option>
-            <option value="price">Price</option>
-          </Select>
-          <Input type="text" value={searchListings} onChange={handleSearchListingChange}/>
+          <Span>Search By ID:</Span>
+          <Input type="text" onChange={handleSearchListingChange}/>
+          <Button onClick={handleSearchListing}>Search</Button>
         </h3>
-        {filteredListings && !!filteredListings.length && (
+        {
+          listingError != null && <ul>
+            <li>SaleMomentID doesn't exist for user</li>
+          </ul>
+        }
+        {listings && !!listings.length && listingError == null && (
           <div>
             <Table striped bordered hover size="sm">
               <thead>
@@ -410,7 +396,7 @@ export function Account() {
                 </tr>
               </thead>
               <tbody>
-                {filteredListings
+                {listings
                   .sort((a, b) => {
                     return a.setName === b.setName ? 0 : +(a.setName > b.setName) || -1
                   })
@@ -438,7 +424,7 @@ export function Account() {
               pageLinkClassName="page-link"
               previousLinkClassName="page-link"
               nextLinkClassName="page-link"
-              pageCount={topshotAccount ? topshotAccount.saleMomentIDs.length / 20 : 0}
+              pageCount={saleMomentIDs.length === 1 ? 1 : topshotAccount ? topshotAccount.saleMomentIDs.length / 20 : 0}
               marginPagesDisplayed={2}
               pageRangeDisplayed={5}
               onPageChange={handleSalePageClick}
