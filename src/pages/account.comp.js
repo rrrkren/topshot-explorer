@@ -20,7 +20,6 @@ const getTopshotAccount = async (address) => {
   pub struct TopshotAccount {
     pub var momentIDs: [UInt64]
     pub var saleMomentIDs: [UInt64]
-
     init(momentIDs: [UInt64], saleMomentIDs: [UInt64]) {
       self.momentIDs = momentIDs
       self.saleMomentIDs = saleMomentIDs
@@ -31,14 +30,12 @@ const getTopshotAccount = async (address) => {
   let collectionRef = acct.getCapability(/public/MomentCollection)!
                 .borrow<&{TopShot.MomentCollectionPublic}>()!
   let momentIDs = collectionRef.getIDs()
-
   var saleMomentIDs: [UInt64] = []
   let salePublic = acct.getCapability(/public/topshotSaleCollection)
   if salePublic!.check<&{Market.SalePublic}>(){
     let saleCollectionRef = salePublic!.borrow<&{Market.SalePublic}>() ?? panic("Could not borrow capability from public collection")
     saleMomentIDs = saleCollectionRef.getIDs()  
   }
-
   return TopshotAccount(momentIDs: momentIDs, saleMomentIDs: saleMomentIDs)
 }  `,
   ])

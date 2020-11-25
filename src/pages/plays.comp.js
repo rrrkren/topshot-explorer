@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from "react"
 import * as fcl from "@onflow/fcl"
 import styled from "styled-components"
-import {Table} from "react-bootstrap"
+import ReactDatatable from '@ashvin27/react-datatable'
 
 const getTopshotPlays = async () => {
   const resp = await fcl.send([
@@ -31,6 +31,39 @@ const Muted = styled.span`
 
 const H1 = styled.h1``
 
+const columns = [
+  {
+      key: "playID",
+      text: "Play ID",
+      align: "left",
+      sortable: true,
+  },
+  {
+      key: "fullName",
+      text: "Full Name",
+      align: "left",
+      sortable: true
+  },
+  {
+      key: "playType",
+      text: "Play Type",
+      sortable: true
+  },
+  {
+      key: "teamAtMoment",
+      text: "Team at Moment",
+      align: "left",
+      sortable: true
+  },
+];
+
+const config = {
+  page_size: 10,
+  length_menu: [ 10, 20, 50 ],
+  no_data_text: 'No data available!',
+  sort: { column: "playID", order: "desc" }
+}
+
 export function TopshotPlays() {
   const [error, setError] = useState(null)
 
@@ -43,7 +76,7 @@ export function TopshotPlays() {
       })
       .catch(() => setError(true))
   }, [])
-
+  
   if (error != null)
     return (
       <Root>
@@ -67,34 +100,23 @@ export function TopshotPlays() {
       </Root>
     )
 
+  const data = topshotPlays.plays?.map((play) => {
+    return {playID: play.playID, fullName: play.metadata.FullName,
+      playType: play.metadata.PlayType, teamAtMoment: play.metadata.TeamAtMoment}
+  })
+
   return (
     <Root>
       <H1>Plays</H1>
       <div>
         {topshotPlays && (
           <div>
-            <Table striped bordered hover size="sm">
-              <thead>
-                <tr>
-                  <th>playID</th>
-                  <th>full name</th>
-                  <th>play type</th>
-                  <th>team at moment</th>
-                </tr>
-              </thead>
-              <tbody>
-                {topshotPlays.plays.map((play) => {
-                  return (
-                    <tr key={play.playID}>
-                      <td>{play.playID}</td>
-                      <td>{play.metadata.FullName}</td>
-                      <td>{play.metadata.PlayType}</td>
-                      <td>{play.metadata.TeamAtMoment}</td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </Table>
+            <ReactDatatable
+              config={config}
+              records={data}
+              columns={columns}
+              extraButtons={[]}
+            />
           </div>
         )}
       </div>

@@ -2,7 +2,7 @@ import React, {useState, useEffect} from "react"
 import {useParams} from "react-router-dom"
 import styled from "styled-components"
 
-import {Table} from "react-bootstrap"
+import ReactDatatable from '@ashvin27/react-datatable'
 
 import * as fcl from "@onflow/fcl"
 const Red = styled.span`
@@ -73,6 +73,45 @@ const Root = styled.div`
   padding: 21px;
 `
 
+const columns = [
+  {
+      key: "playID",
+      text: "Play ID",
+      align: "left",
+      sortable: true,
+  },
+  {
+    key: "retired",
+    text: "Retired",
+    align: "left",
+    sortable: true,
+  },
+  {
+      key: "fullName",
+      text: "Full Name",
+      align: "left",
+      sortable: true
+  },
+  {
+      key: "playType",
+      text: "Play Type",
+      sortable: true
+  },
+  {
+      key: "totalMinted",
+      text: "Total Minted",
+      align: "left",
+      sortable: true
+  },
+];
+
+const config = {
+  page_size: 10,
+  length_menu: [ 10, 20, 50 ],
+  no_data_text: 'No data available!',
+  sort: { column: "playID", order: "desc" }
+}
+
 export function TopshotSet() {
   const [error, setError] = useState(null)
   const {setID} = useParams()
@@ -105,38 +144,24 @@ export function TopshotSet() {
         </h3>
       </Root>
     )
-
+  
+  const data = TopshotSet.set.editions?.map((edition) => {
+    var play = getPlay(edition.playID)[0]
+    return {playID: play.playID, retired: edition.retired ? <Red>retired</Red> : <Green>open</Green>, fullName: play.metadata.FullName,
+      playType: play.metadata.PlayType, totalMinted: edition.momentCount}
+  })
   return (
     <Root>
       <h1>
         <Muted>{TopshotSet.set.setName}</Muted>:{" "}
         {TopshotSet.set.locked ? <Red>locked set</Red> : <Green>open set</Green>}
       </h1>
-      <Table striped bordered hover size="sm">
-        <thead>
-          <tr>
-            <th>playID</th>
-            <th>retired</th>
-            <th>full name</th>
-            <th>play type</th>
-            <th>total minted</th>
-          </tr>
-        </thead>
-        <tbody>
-          {TopshotSet.set.editions.map((edition) => {
-            var play = getPlay(edition.playID)[0]
-            return (
-              <tr key={edition.playID}>
-                <td>{play.playID}</td>
-                <td>{edition.retired ? <Red>retired</Red> : <Green>open</Green>}</td>
-                <td>{play.metadata.FullName}</td>
-                <td>{play.metadata.PlayType}</td>
-                <td>{edition.momentCount}</td>
-              </tr>
-            )
-          })}
-        </tbody>
-      </Table>
+      <ReactDatatable
+        config={config}
+        records={data}
+        columns={columns}
+        extraButtons={[]}
+      />
     </Root>
   )
 }
