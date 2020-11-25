@@ -23,10 +23,12 @@ const getTopshotSet = async (setID) => {
         pub let playID: UInt32
         pub let retired: Bool
         pub let momentCount: UInt32
-        init(playID: UInt32, retired: Bool, momentCount: UInt32) {
+        pub let playOrder: UInt32
+        init(playID: UInt32, retired: Bool, momentCount: UInt32, playOrder: UInt32) {
           self.playID = playID
           self.retired = retired
           self.momentCount = momentCount
+          self.playOrder = playOrder
         }
       }
       pub struct Set {
@@ -42,12 +44,14 @@ const getTopshotSet = async (setID) => {
           self.locked = false
           self.locked = TopShot.isSetLocked(setID: id)!
           var editions: [Edition] = []
+          var playOrder = UInt32(1)
           for playID in self.playIDs {
             var retired = false
             retired = TopShot.isEditionRetired(setID: id, playID: playID)!
             var momentCount = UInt32(0)
             momentCount = TopShot.getNumMomentsInEdition(setID: id, playID: playID)!
-            editions.append(Edition(playID: playID, retired: retired, momentCount: momentCount))
+            editions.append(Edition(playID: playID, retired: retired, momentCount: momentCount, playOrder: playOrder))
+            playOrder = playOrder + UInt32(1)
           }
           self.editions = editions
         }
@@ -74,6 +78,12 @@ const Root = styled.div`
 `
 
 const columns = [
+  {
+    key: "playOrder",
+    text: "Creation Order",
+    align: "left",
+    sortable: true,
+  },
   {
       key: "playID",
       text: "Play ID",
@@ -109,7 +119,7 @@ const config = {
   page_size: 10,
   length_menu: [ 10, 20, 50 ],
   no_data_text: 'No data available!',
-  sort: { column: "playID", order: "desc" }
+  sort: { column: "playOrder", order: "desc" }
 }
 
 export function TopshotSet() {
@@ -117,7 +127,11 @@ export function TopshotSet() {
   const {setID} = useParams()
   const [TopshotSet, setTopshotSet] = useState(null)
   useEffect(() => {
-    getTopshotSet(setID).then(setTopshotSet).catch(setError)
+    getTopshotSet(setID).then(
+      (topshotSet) => {
+        console.log(topshotSet)
+        setTopshotSet(topshotSet)
+      }).catch(setError)
   }, [setID])
   const getPlay = (playID) => {
     return (
@@ -148,7 +162,7 @@ export function TopshotSet() {
   const data = TopshotSet.set.editions?.map((edition) => {
     var play = getPlay(edition.playID)[0]
     return {playID: play.playID, retired: edition.retired ? <Red>retired</Red> : <Green>open</Green>, fullName: play.metadata.FullName,
-      playType: play.metadata.PlayType, totalMinted: edition.momentCount}
+      playType: play.metadata.PlayType, totalMinted: edition.momentCount, playOrder: edition.playOrder}
   })
   return (
     <Root>
