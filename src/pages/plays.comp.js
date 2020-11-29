@@ -61,21 +61,49 @@ const config = {
   page_size: 10,
   length_menu: [ 10, 20, 50 ],
   no_data_text: 'No data available!',
-  sort: { column: "playID", order: "desc" }
+  sort: { column: "playID", order: "desc" },
+  key_column: "playID",
 }
 
 export function TopshotPlays() {
   const [error, setError] = useState(null)
 
+  // used to chek the reload, so another reload is not triggered while the previous is still running
+  const [done, setDone] = useState(false)
+
   const [topshotPlays, setTopshotPlays] = useState(null)
   useEffect(() => {
-    getTopshotPlays()
+    load()
+      .catch(() => setError(true))
+  }, [])
+
+  // for reloading
+  useEffect(() => {
+    if(done){
+      // set some delay
+      setTimeout(()=>{
+        load()
+        .catch((e)=>{
+          console.log(e);
+        })
+        console.log("reloaded!!!");
+      }, 5000)
+    }
+  }, [done]);
+
+  const load = () => {
+    setDone(false)
+    return getTopshotPlays()
       .then((d) => {
         console.log(d)
         setTopshotPlays(d)
+        setDone(true)
       })
-      .catch(() => setError(true))
-  }, [])
+  }
+
+  const manualReload = () => {
+
+  }
   
   if (error != null)
     return (

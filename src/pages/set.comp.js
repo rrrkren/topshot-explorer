@@ -119,20 +119,47 @@ const config = {
   page_size: 10,
   length_menu: [ 10, 20, 50 ],
   no_data_text: 'No data available!',
-  sort: { column: "playOrder", order: "desc" }
+  sort: { column: "playOrder", order: "desc" },
+  key_column: "playOrder",
 }
 
 export function TopshotSet() {
   const [error, setError] = useState(null)
   const {setID} = useParams()
   const [TopshotSet, setTopshotSet] = useState(null)
+
+  // used to chek the reload, so another reload is not triggered while the previous is still running
+  const [done, setDone] = useState(false)
+
   useEffect(() => {
-    getTopshotSet(setID).then(
+    load()
+      .catch(setError)
+  }, [setID])
+
+  // for reloading
+  useEffect(() => {
+    if(done){
+      // set some delay
+      setTimeout(()=>{
+        load()
+        .catch((e)=>{
+          console.log(e);
+        })
+        console.log("reloaded!!!");
+      }, 5000)
+    }
+  }, [done]);
+
+  const load = () => {
+    setDone(false)
+    return getTopshotSet(setID).then(
       (topshotSet) => {
         console.log(topshotSet)
         setTopshotSet(topshotSet)
-      }).catch(setError)
-  }, [setID])
+        setDone(true)
+      })
+  }
+
   const getPlay = (playID) => {
     return (
       TopshotSet &&

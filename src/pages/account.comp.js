@@ -181,15 +181,12 @@ export function Account() {
   const [momentIDs, setMomentIDs] = useState([])
   const [saleMomentIDs, setSaleMomentIDs] = useState([])
 
+  // used to chek the reload, so another reload is not triggered while the previous is still running
+  const [done, setDone] = useState(false)
+
   useEffect(() => {
-    getTopshotAccount(address)
-      .then((d) => {
-        console.log(d)
-        setTopShotAccount(d)
-        setMomentIDs(d.momentIDs.slice(0, 20))
-        setSaleMomentIDs(d.saleMomentIDs.slice(0, 20))
-      })
-      .catch(setError)
+    load()
+    .catch(setError)
   }, [address])
 
   useEffect(() => {
@@ -213,6 +210,32 @@ export function Account() {
       })
       .catch(setListingError)
   }, [address, saleMomentIDs])
+
+  // for reloading
+  useEffect(() => {
+    if(done){
+      // set some delay
+      setTimeout(()=>{
+        load()
+        .catch((e)=>{
+          console.log(e);
+        })
+        console.log("reloaded!!!");
+      }, 5000)
+    }
+  }, [done]);
+
+  const load = ()=>{
+    setDone(false)
+    return getTopshotAccount(address)
+      .then((d) => {
+        console.log(d)
+        setTopShotAccount(d)
+        setMomentIDs(d.momentIDs.slice(0, 20))
+        setSaleMomentIDs(d.saleMomentIDs.slice(0, 20))
+        setDone(true)
+      })
+  }
 
   const handlePageClick = function (data) {
     let mIDs = topshotAccount.momentIDs.slice(data.selected * 20, data.selected * 20 + 20)
