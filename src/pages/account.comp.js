@@ -340,6 +340,7 @@ export function Account() {
       <H1>
         <Muted>Account: </Muted>
         <span>{withPrefix(acct.address)}</span>
+        <Button onClick={manualReload}>{manualReloadDone ? "Reload" : "Reloading..."}</Button>
       </H1>
       <div>
         <h3>
@@ -348,7 +349,6 @@ export function Account() {
           <Span>Search By ID:</Span>
           <Input type="text" onChange={handleSearchMomentChange}/>
           <Button onClick={handleSearchMoment}>Search</Button>
-          <Button onClick={manualReload}>{manualReloadDone ? "Reload" : "Reloading..."}</Button>
         </h3>
         {/* <MomentList></MomentList> */}
         {
