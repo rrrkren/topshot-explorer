@@ -112,7 +112,7 @@ export function TopshotPlays() {
       })
   }
 
-  const manualReload = () => {
+  const handleManualReload = () => {
     setManualReloadDone(false)
     load()
     .then(()=>{
@@ -155,9 +155,11 @@ export function TopshotPlays() {
 
   return (
     <Root>
-      <H1>Plays</H1>
+      <H1>
+        <span>Plays</span>
+        <Button onClick={handleManualReload}>{manualReloadDone ? "Reload" : "Reloading..."}</Button>
+      </H1>
       <div>
-        <Button onClick={manualReload}>{manualReloadDone ? "Reload" : "Reloading..."}</Button>
         {topshotPlays && (
           <div>
             <ReactDatatable

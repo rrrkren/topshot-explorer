@@ -240,7 +240,7 @@ export function Account() {
       })
   }
 
-  const manualReload = () => {
+  const handleManualReload = () => {
     setManualReloadDone(false)
     load()
     .then(()=>{
@@ -340,7 +340,7 @@ export function Account() {
       <H1>
         <Muted>Account: </Muted>
         <span>{withPrefix(acct.address)}</span>
-        <Button onClick={manualReload}>{manualReloadDone ? "Reload" : "Reloading..."}</Button>
+        <Button onClick={handleManualReload}>{manualReloadDone ? "Reload" : "Reloading..."}</Button>
       </H1>
       <div>
         <h3>

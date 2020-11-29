@@ -171,7 +171,7 @@ export function TopshotSet() {
       })
   }
 
-  const manualReload = () => {
+  const handleManualReload = () => {
     setManualReloadDone(false)
     load()
     .then(()=>{
@@ -220,8 +220,8 @@ export function TopshotSet() {
       <h1>
         <Muted>{TopshotSet.set.setName}</Muted>:{" "}
         {TopshotSet.set.locked ? <Red>locked set</Red> : <Green>open set</Green>}
+        <Button onClick={handleManualReload}>{manualReloadDone ? "Reload" : "Reloading..."}</Button>
       </h1>
-      <Button onClick={manualReload}>{manualReloadDone ? "Reload" : "Reloading..."}</Button>
       <ReactDatatable
         config={config}
         records={data}
