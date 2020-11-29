@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@ashvin27/react-datatable": "^1.5.3",
     "@onflow/config": "0.0.2",
     "@onflow/fcl": "0.0.51",
     "@onflow/types": "0.0.3",
