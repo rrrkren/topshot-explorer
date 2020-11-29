@@ -15,6 +15,15 @@ const Muted = styled.span`
   color: #78899a;
 `
 
+const Button = styled.button`
+  margin-left: 20px;
+  height: 30px;
+  font-size: 18px;
+  border-radius: 15px;
+  border-color: grey;
+  border-width: 1px;
+`
+
 const getTopshotSet = async (setID) => {
   const resp = await fcl.send([
     fcl.script`
@@ -131,6 +140,8 @@ export function TopshotSet() {
   // used to chek the reload, so another reload is not triggered while the previous is still running
   const [done, setDone] = useState(false)
 
+  const [manualReloadDone, setManualReloadDone] = useState(true)
+
   useEffect(() => {
     load()
       .catch(setError)
@@ -158,6 +169,19 @@ export function TopshotSet() {
         setTopshotSet(topshotSet)
         setDone(true)
       })
+  }
+
+  const manualReload = () => {
+    setManualReloadDone(false)
+    load()
+    .then(()=>{
+      setManualReloadDone(true)
+    })
+    .catch((err)=>{
+      // Do we need to show them the error on manual reloadf?
+      console.log(`An error occured while reloading err: ${err}`);
+    })
+    
   }
 
   const getPlay = (playID) => {
@@ -197,6 +221,7 @@ export function TopshotSet() {
         <Muted>{TopshotSet.set.setName}</Muted>:{" "}
         {TopshotSet.set.locked ? <Red>locked set</Red> : <Green>open set</Green>}
       </h1>
+      <Button onClick={manualReload}>{manualReloadDone ? "Reload" : "Reloading..."}</Button>
       <ReactDatatable
         config={config}
         records={data}

@@ -170,6 +170,7 @@ const Span = styled.span`
   font-size: 18px;
 `
 
+
 export function Account() {
   const {address} = useParams()
   const [acct, setAcct] = useState(null)
@@ -183,6 +184,8 @@ export function Account() {
 
   // used to chek the reload, so another reload is not triggered while the previous is still running
   const [done, setDone] = useState(false)
+
+  const [manualReloadDone, setManualReloadDone] = useState(true)
 
   useEffect(() => {
     load()
@@ -235,6 +238,18 @@ export function Account() {
         setSaleMomentIDs(d.saleMomentIDs.slice(0, 20))
         setDone(true)
       })
+  }
+
+  const manualReload = () => {
+    setManualReloadDone(false)
+    load()
+    .then(()=>{
+      setManualReloadDone(true)
+    })
+    .catch((err)=>{
+      // Do we need to show them the error on manual reloadf?
+      console.log(`An error occured while reloading err: ${err}`);
+    })
   }
 
   const handlePageClick = function (data) {
@@ -333,6 +348,7 @@ export function Account() {
           <Span>Search By ID:</Span>
           <Input type="text" onChange={handleSearchMomentChange}/>
           <Button onClick={handleSearchMoment}>Search</Button>
+          <Button onClick={manualReload}>{manualReloadDone ? "Reload" : "Reloading..."}</Button>
         </h3>
         {/* <MomentList></MomentList> */}
         {

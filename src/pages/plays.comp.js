@@ -31,6 +31,15 @@ const Muted = styled.span`
 
 const H1 = styled.h1``
 
+const Button = styled.button`
+  margin-left: 20px;
+  height: 30px;
+  font-size: 18px;
+  border-radius: 15px;
+  border-color: grey;
+  border-width: 1px;
+`
+
 const columns = [
   {
       key: "playID",
@@ -71,6 +80,8 @@ export function TopshotPlays() {
   // used to chek the reload, so another reload is not triggered while the previous is still running
   const [done, setDone] = useState(false)
 
+  const [manualReloadDone, setManualReloadDone] = useState(true)
+
   const [topshotPlays, setTopshotPlays] = useState(null)
   useEffect(() => {
     load()
@@ -102,7 +113,16 @@ export function TopshotPlays() {
   }
 
   const manualReload = () => {
-
+    setManualReloadDone(false)
+    load()
+    .then(()=>{
+      setManualReloadDone(true)
+    })
+    .catch((err)=>{
+      // Do we need to show them the error on manual reloadf?
+      console.log(`An error occured while reloading err: ${err}`);
+    })
+    
   }
   
   if (error != null)
@@ -137,6 +157,7 @@ export function TopshotPlays() {
     <Root>
       <H1>Plays</H1>
       <div>
+        <Button onClick={manualReload}>{manualReloadDone ? "Reload" : "Reloading..."}</Button>
         {topshotPlays && (
           <div>
             <ReactDatatable
