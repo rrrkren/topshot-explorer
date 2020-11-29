@@ -95,6 +95,7 @@ export function TopshotPlays() {
       setTimeout(()=>{
         load()
         .catch((e)=>{
+          setDone(true) // enable reloading again for failed reload attempts
           console.log(e);
         })
         console.log("reloaded!!!");
@@ -119,6 +120,7 @@ export function TopshotPlays() {
       setManualReloadDone(true)
     })
     .catch((err)=>{
+      setManualReloadDone(true)
       // Do we need to show them the error on manual reloadf?
       console.log(`An error occured while reloading err: ${err}`);
     })
