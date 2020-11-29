@@ -151,7 +151,7 @@ export function TopshotSet() {
   useEffect(() => {
     if(done){
       // set some delay
-      setTimeout(()=>{
+      const timer = setTimeout(()=>{
         load()
         .catch((e)=>{
           setDone(true) // enable reloading again for failed reload attempts
@@ -159,7 +159,8 @@ export function TopshotSet() {
         })
         console.log("reloaded!!!");
       }, 5000)
-    }
+      return () => clearTimeout(timer);
+    }    
   }, [done]);
 
   const load = () => {

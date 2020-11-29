@@ -92,7 +92,7 @@ export function TopshotPlays() {
   useEffect(() => {
     if(done){
       // set some delay
-      setTimeout(()=>{
+      const timer = setTimeout(()=>{
         load()
         .catch((e)=>{
           setDone(true) // enable reloading again for failed reload attempts
@@ -100,6 +100,7 @@ export function TopshotPlays() {
         })
         console.log("reloaded!!!");
       }, 5000)
+      return () => clearTimeout(timer);
     }
   }, [done]);
 
