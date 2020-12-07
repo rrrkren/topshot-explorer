@@ -281,8 +281,10 @@ export function Account() {
     setMomentError(null)
     if(searchMomentID === null || searchMomentID === ""){
       setMomentIDs(topshotAccount.momentIDs.slice(0, 20))
+      setDone(true)  // continue real-time update
       return
     }
+    setDone(false)  // stop real-time update
     let value = parseInt(searchMomentID)
     //search the list of momentIDs
     if(!topshotAccount.momentIDs.includes(value)){
@@ -296,8 +298,10 @@ export function Account() {
     setListingError(null)
     if(searchListingID === null || searchListingID === ""){
       setSaleMomentIDs(topshotAccount.saleMomentIDs.slice(0, 20))
+      setDone(true)  // continue real-time update
       return
     }
+    setDone(false)  // stop real-time update
     let value = parseInt(searchListingID)
     //search the list of saleMomentIDs
     if(!topshotAccount.saleMomentIDs.includes(value)){
