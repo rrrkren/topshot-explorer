@@ -18,10 +18,11 @@ const getTopshotOverview = async () => {
         pub let id: UInt32
         pub let setName: String
         pub var locked: Bool
-        init(id: UInt32, setName: String) {
+        pub let series: UInt32
+        init(id: UInt32, setName: String, series: UInt32) {
           self.id = id
           self.setName = setName
-          self.locked = false
+          self.series = series
           self.locked = TopShot.isSetLocked(setID: id)!
         }
       }
@@ -34,7 +35,8 @@ const getTopshotOverview = async () => {
           var sets: [Set] = []
           while setID < TopShot.nextSetID {
             var setName = TopShot.getSetName(setID: setID)
-            sets.append(Set(id: setID, setName: setName!))
+            var series = TopShot.getSetSeries(setID: setID)
+            sets.append(Set(id: setID, setName: setName!, series: series!))
             setID = setID + UInt32(1)
           }
           self.sets = sets
@@ -74,7 +76,7 @@ export function TopShotNav() {
               topshotOverview.sets.map((s) => {
                 return (
                   <NavDropdown.Item key={s.id} href={"/sets/" + s.id}>
-                    {s.id} {s.setName} {s.locked ? <Red>locked</Red> : <Green>open</Green>}
+                    {s.id} {s.setName} S{s.series} {s.locked ? <Red>locked</Red> : <Green>open</Green>} 
                   </NavDropdown.Item>
                 )
               })}
