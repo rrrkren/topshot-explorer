@@ -16,7 +16,6 @@ const getTopShot = async () => {
         self.id = id
         self.setName = setName
         self.playIDs = TopShot.getPlaysInSet(setID: id)!
-        self.locked = false
         self.locked = TopShot.isSetLocked(setID: id)!
         for playID in self.playIDs {
           var retired = false
@@ -30,8 +29,10 @@ const getTopShot = async () => {
       pub let totalSupply: UInt64
       pub let plays: [TopShot.Play]
       pub let sets: [Set]
+      pub let currentSeries: UInt32
       init() {
         self.totalSupply = TopShot.totalSupply
+        self.currentSeries = TopShot.currentSeries
         self.plays = TopShot.getAllPlays()
         var setID = UInt32(1)
         var sets: [Set] = []
@@ -107,10 +108,16 @@ export function TopShot() {
       </h3>
       <div>
         {topshotData && (
-          <h3>
-            <Muted>Total Supply: </Muted>
-            <span>{topshotData.totalSupply}</span>
-          </h3>
+          <div>
+            <h3>
+              <Muted>Total Supply: </Muted>
+              <span>{topshotData.totalSupply}</span>
+            </h3>
+            <h3>
+              <Muted>Current Series: </Muted>
+              <span>S{topshotData.currentSeries}</span>
+            </h3>
+          </div>
         )}
       </div>
 
