@@ -170,6 +170,7 @@ const Span = styled.span`
   font-size: 18px;
 `
 
+
 export function Account() {
   const {address} = useParams()
   const [acct, setAcct] = useState(null)
@@ -181,15 +182,14 @@ export function Account() {
   const [momentIDs, setMomentIDs] = useState([])
   const [saleMomentIDs, setSaleMomentIDs] = useState([])
 
+  // used to chek the reload, so another reload is not triggered while the previous is still running
+  const [done, setDone] = useState(false)
+
+  const [manualReloadDone, setManualReloadDone] = useState(true)
+
   useEffect(() => {
-    getTopshotAccount(address)
-      .then((d) => {
-        console.log(d)
-        setTopShotAccount(d)
-        setMomentIDs(d.momentIDs.slice(0, 20))
-        setSaleMomentIDs(d.saleMomentIDs.slice(0, 20))
-      })
-      .catch(setError)
+    load()
+    .catch(setError)
   }, [address])
 
   useEffect(() => {
@@ -213,6 +213,47 @@ export function Account() {
       })
       .catch(setListingError)
   }, [address, saleMomentIDs])
+
+  // for reloading
+  useEffect(() => {
+    if(done){
+      // set some delay
+      const timer = setTimeout(()=>{
+        load()
+        .catch((e)=>{
+          setDone(true) // enable reloading again for failed reload attempts
+          console.log(e);
+        })
+        console.log("reloaded!!!");
+      }, 5000)
+      return () => clearTimeout(timer);
+    }
+  }, [done]);
+
+  const load = ()=>{
+    setDone(false)
+    return getTopshotAccount(address)
+      .then((d) => {
+        console.log(d)
+        setTopShotAccount(d)
+        setMomentIDs(d.momentIDs.slice(0, 20))
+        setSaleMomentIDs(d.saleMomentIDs.slice(0, 20))
+        setDone(true)
+      })
+  }
+
+  const handleManualReload = () => {
+    setManualReloadDone(false)
+    load()
+    .then(()=>{
+      setManualReloadDone(true)
+    })
+    .catch((err)=>{
+      setManualReloadDone(true)
+      // Do we need to show them the error on manual reloadf?
+      console.log(`An error occured while reloading err: ${err}`);
+    })
+  }
 
   const handlePageClick = function (data) {
     let mIDs = topshotAccount.momentIDs.slice(data.selected * 20, data.selected * 20 + 20)
@@ -240,8 +281,10 @@ export function Account() {
     setMomentError(null)
     if(searchMomentID === null || searchMomentID === ""){
       setMomentIDs(topshotAccount.momentIDs.slice(0, 20))
+      setDone(true)  // continue real-time update
       return
     }
+    setDone(false)  // stop real-time update
     let value = parseInt(searchMomentID)
     //search the list of momentIDs
     if(!topshotAccount.momentIDs.includes(value)){
@@ -255,8 +298,10 @@ export function Account() {
     setListingError(null)
     if(searchListingID === null || searchListingID === ""){
       setSaleMomentIDs(topshotAccount.saleMomentIDs.slice(0, 20))
+      setDone(true)  // continue real-time update
       return
     }
+    setDone(false)  // stop real-time update
     let value = parseInt(searchListingID)
     //search the list of saleMomentIDs
     if(!topshotAccount.saleMomentIDs.includes(value)){
@@ -302,6 +347,7 @@ export function Account() {
       <H1>
         <Muted>Account: </Muted>
         <span>{withPrefix(acct.address)}</span>
+        <Button onClick={handleManualReload}>{manualReloadDone ? "Reload" : "Reloading..."}</Button>
       </H1>
       <div>
         <h3>

@@ -31,6 +31,15 @@ const Muted = styled.span`
 
 const H1 = styled.h1``
 
+const Button = styled.button`
+  margin-left: 20px;
+  height: 30px;
+  font-size: 18px;
+  border-radius: 15px;
+  border-color: grey;
+  border-width: 1px;
+`
+
 const columns = [
   {
       key: "playID",
@@ -68,15 +77,56 @@ const config = {
 export function TopshotPlays() {
   const [error, setError] = useState(null)
 
+  // used to chek the reload, so another reload is not triggered while the previous is still running
+  const [done, setDone] = useState(false)
+
+  const [manualReloadDone, setManualReloadDone] = useState(true)
+
   const [topshotPlays, setTopshotPlays] = useState(null)
   useEffect(() => {
-    getTopshotPlays()
+    load()
+      .catch(() => setError(true))
+  }, [])
+
+  // for reloading
+  useEffect(() => {
+    if(done){
+      // set some delay
+      const timer = setTimeout(()=>{
+        load()
+        .catch((e)=>{
+          setDone(true) // enable reloading again for failed reload attempts
+          console.log(e);
+        })
+        console.log("reloaded!!!");
+      }, 5000)
+      return () => clearTimeout(timer);
+    }
+  }, [done]);
+
+  const load = () => {
+    setDone(false)
+    return getTopshotPlays()
       .then((d) => {
         console.log(d)
         setTopshotPlays(d)
+        setDone(true)
       })
-      .catch(() => setError(true))
-  }, [])
+  }
+
+  const handleManualReload = () => {
+    setManualReloadDone(false)
+    load()
+    .then(()=>{
+      setManualReloadDone(true)
+    })
+    .catch((err)=>{
+      setManualReloadDone(true)
+      // Do we need to show them the error on manual reloadf?
+      console.log(`An error occured while reloading err: ${err}`);
+    })
+    
+  }
   
   if (error != null)
     return (
@@ -108,7 +158,10 @@ export function TopshotPlays() {
 
   return (
     <Root>
-      <H1>Plays</H1>
+      <H1>
+        <span>Plays</span>
+        <Button onClick={handleManualReload}>{manualReloadDone ? "Reload" : "Reloading..."}</Button>
+      </H1>
       <div>
         {topshotPlays && (
           <div>

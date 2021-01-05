@@ -15,6 +15,15 @@ const Muted = styled.span`
   color: #78899a;
 `
 
+const Button = styled.button`
+  margin-left: 20px;
+  height: 30px;
+  font-size: 18px;
+  border-radius: 15px;
+  border-color: grey;
+  border-width: 1px;
+`
+
 const getTopshotSet = async (setID) => {
   const resp = await fcl.send([
     fcl.script`
@@ -128,13 +137,57 @@ export function TopshotSet() {
   const [error, setError] = useState(null)
   const {setID} = useParams()
   const [TopshotSet, setTopshotSet] = useState(null)
+
+  // used to chek the reload, so another reload is not triggered while the previous is still running
+  const [done, setDone] = useState(false)
+
+  const [manualReloadDone, setManualReloadDone] = useState(true)
+
   useEffect(() => {
-    getTopshotSet(setID).then(
+    load()
+      .catch(setError)
+  }, [setID])
+
+  // for reloading
+  useEffect(() => {
+    if(done){
+      // set some delay
+      const timer = setTimeout(()=>{
+        load()
+        .catch((e)=>{
+          setDone(true) // enable reloading again for failed reload attempts
+          console.log(e);
+        })
+        console.log("reloaded!!!");
+      }, 5000)
+      return () => clearTimeout(timer);
+    }    
+  }, [done]);
+
+  const load = () => {
+    setDone(false)
+    return getTopshotSet(setID).then(
       (topshotSet) => {
         console.log(topshotSet)
         setTopshotSet(topshotSet)
-      }).catch(setError)
-  }, [setID])
+        setDone(true)
+      })
+  }
+
+  const handleManualReload = () => {
+    setManualReloadDone(false)
+    load()
+    .then(()=>{
+      setManualReloadDone(true)
+    })
+    .catch((err)=>{
+      setManualReloadDone(true)
+      // Do we need to show them the error on manual reloadf?
+      console.log(`An error occured while reloading err: ${err}`);
+    })
+    
+  }
+
   const getPlay = (playID) => {
     return (
       TopshotSet &&
@@ -171,6 +224,7 @@ export function TopshotSet() {
       <h1>
         <Muted>{TopshotSet.set.setName}</Muted> S{TopshotSet.set.series}:
         {TopshotSet.set.locked ? <Red>locked set</Red> : <Green>open set</Green>}
+        <Button onClick={handleManualReload}>{manualReloadDone ? "Reload" : "Reloading..."}</Button>
       </h1>
       <ReactDatatable
         config={config}
