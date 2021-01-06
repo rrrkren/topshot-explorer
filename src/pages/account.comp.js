@@ -190,7 +190,7 @@ export function Account() {
   useEffect(() => {
     load()
     .catch(setError)
-  }, [address])
+  }, [address]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     getAccount(address).then(setAcct).catch(setError)
@@ -228,7 +228,7 @@ export function Account() {
       }, 5000)
       return () => clearTimeout(timer);
     }
-  }, [done]);
+  }, [done]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const load = ()=>{
     setDone(false)

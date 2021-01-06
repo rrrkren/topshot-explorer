@@ -145,7 +145,7 @@ export function TopshotSet() {
   useEffect(() => {
     load()
       .catch(setError)
-  }, [setID])
+  }, [setID]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // for reloading
   useEffect(() => {
@@ -161,7 +161,7 @@ export function TopshotSet() {
       }, 5000)
       return () => clearTimeout(timer);
     }    
-  }, [done]);
+  }, [done]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const load = () => {
     setDone(false)
