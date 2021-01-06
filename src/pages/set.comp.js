@@ -45,13 +45,14 @@ const getTopshotSet = async (setID) => {
         pub let setName: String
         pub let playIDs: [UInt32]
         pub let editions: [Edition]
-        pub var locked: Bool
+        pub let locked: Bool
+        pub let series: UInt32
         init(id: UInt32, setName: String) {
           self.id = id
           self.setName = setName
           self.playIDs = TopShot.getPlaysInSet(setID: id)!
-          self.locked = false
           self.locked = TopShot.isSetLocked(setID: id)!
+          self.series = TopShot.getSetSeries(setID: id)!
           var editions: [Edition] = []
           var playOrder = UInt32(1)
           for playID in self.playIDs {
@@ -129,7 +130,7 @@ const config = {
   length_menu: [ 10, 20, 50 ],
   no_data_text: 'No data available!',
   sort: { column: "playOrder", order: "desc" },
-  key_column: "playOrder",
+  key_column: "playID"
 }
 
 export function TopshotSet() {
@@ -221,7 +222,7 @@ export function TopshotSet() {
   return (
     <Root>
       <h1>
-        <Muted>{TopshotSet.set.setName}</Muted>:{" "}
+        <Muted>{TopshotSet.set.setName}</Muted> S{TopshotSet.set.series}:
         {TopshotSet.set.locked ? <Red>locked set</Red> : <Green>open set</Green>}
         <Button onClick={handleManualReload}>{manualReloadDone ? "Reload" : "Reloading..."}</Button>
       </h1>

@@ -71,7 +71,7 @@ const config = {
   length_menu: [ 10, 20, 50 ],
   no_data_text: 'No data available!',
   sort: { column: "playID", order: "desc" },
-  key_column: "playID",
+  key_column: "playID"
 }
 
 export function TopshotPlays() {
