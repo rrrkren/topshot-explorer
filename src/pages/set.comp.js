@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react"
+import React, {useState, useEffect, useCallback} from "react"
 import {useParams} from "react-router-dom"
 import styled from "styled-components"
 
@@ -143,10 +143,20 @@ export function TopshotSet() {
 
   const [manualReloadDone, setManualReloadDone] = useState(true)
 
+  const load = useCallback(() => {
+    setDone(false)
+    return getTopshotSet(setID).then(
+      (topshotSet) => {
+        console.log(topshotSet)
+        setTopshotSet(topshotSet)
+        setDone(true)
+      })
+  }, [setID])
+
   useEffect(() => {
     load()
       .catch(setError)
-  }, [setID]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [setID, load]);
 
   // for reloading
   useEffect(() => {
@@ -162,17 +172,7 @@ export function TopshotSet() {
       }, 5000)
       return () => clearTimeout(timer);
     }    
-  }, [done]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const load = () => {
-    setDone(false)
-    return getTopshotSet(setID).then(
-      (topshotSet) => {
-        console.log(topshotSet)
-        setTopshotSet(topshotSet)
-        setDone(true)
-      })
-  }
+  }, [done, load]);
 
   const handleManualReload = () => {
     setManualReloadDone(false)
