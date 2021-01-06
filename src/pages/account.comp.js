@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react"
+import React, {useState, useEffect, useCallback} from "react"
 import {useParams} from "react-router-dom"
 import {withPrefix, sansPrefix} from "../util/address.util"
 import * as fcl from "@onflow/fcl"
@@ -187,10 +187,22 @@ export function Account() {
 
   const [manualReloadDone, setManualReloadDone] = useState(true)
 
+  const load = useCallback(() => {
+    setDone(false)
+    return getTopshotAccount(address)
+      .then((d) => {
+        console.log(d)
+        setTopShotAccount(d)
+        setMomentIDs(d.momentIDs.slice(0, 20))
+        setSaleMomentIDs(d.saleMomentIDs.slice(0, 20))
+        setDone(true)
+      })
+  }, [address])
+
   useEffect(() => {
     load()
     .catch(setError)
-  }, [address])
+  }, [address, load])
 
   useEffect(() => {
     getAccount(address).then(setAcct).catch(setError)
@@ -228,19 +240,7 @@ export function Account() {
       }, 5000)
       return () => clearTimeout(timer);
     }
-  }, [done]);
-
-  const load = ()=>{
-    setDone(false)
-    return getTopshotAccount(address)
-      .then((d) => {
-        console.log(d)
-        setTopShotAccount(d)
-        setMomentIDs(d.momentIDs.slice(0, 20))
-        setSaleMomentIDs(d.saleMomentIDs.slice(0, 20))
-        setDone(true)
-      })
-  }
+  }, [done, load]);
 
   const handleManualReload = () => {
     setManualReloadDone(false)
