@@ -166,9 +166,7 @@ export function TopshotSet() {
         load()
         .catch((e)=>{
           setDone(true) // enable reloading again for failed reload attempts
-          console.log(e);
         })
-        console.log("reloaded!!!");
       }, 5000)
       return () => clearTimeout(timer);
     }    
