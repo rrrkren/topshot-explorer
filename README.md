@@ -1,5 +1,5 @@
 Topshot explorer
-https://topshot.renf.ca
+https://topshotexplorer.com
 
 project template ripped from https://github.com/orodio/flow-view-source
 
