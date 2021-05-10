@@ -118,6 +118,11 @@ const columns = [
       sortable: true
   },
   {
+      key: "playCategory",
+      text: "Play Category",
+      sortable: true
+  },
+  {
       key: "totalMinted",
       text: "Total Minted",
       align: "left",
@@ -215,7 +220,7 @@ export function TopshotSet() {
   const data = TopshotSet.set.editions?.map((edition) => {
     var play = getPlay(edition.playID)[0]
     return {playID: play.playID, retired: edition.retired ? <Red>retired</Red> : <Green>open</Green>, fullName: play.metadata.FullName,
-      playType: play.metadata.PlayType, totalMinted: edition.momentCount, playOrder: edition.playOrder}
+      playType: play.metadata.PlayType, playCategory: play.metadata.PlayCategory, totalMinted: edition.momentCount, playOrder: edition.playOrder}
   })
   return (
     <Root>

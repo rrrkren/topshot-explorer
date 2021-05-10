@@ -59,6 +59,11 @@ const columns = [
       sortable: true
   },
   {
+      key: "playCategory",
+      text: "Play Category",
+      sortable: true
+  },
+  {
       key: "teamAtMoment",
       text: "Team at Moment",
       align: "left",
@@ -151,7 +156,7 @@ export function TopshotPlays() {
 
   const data = topshotPlays.plays?.map((play) => {
     return {playID: play.playID, fullName: play.metadata.FullName,
-      playType: play.metadata.PlayType, teamAtMoment: play.metadata.TeamAtMoment}
+      playType: play.metadata.PlayType, playCategory: play.metadata.PlayCategory, teamAtMoment: play.metadata.TeamAtMoment}
   })
 
   return (
