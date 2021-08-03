@@ -20,9 +20,11 @@ const getTopshotAccount = async (address) => {
   pub struct TopshotAccount {
     pub var momentIDs: [UInt64]
     pub var saleMomentIDs: [UInt64]
-    init(momentIDs: [UInt64], saleMomentIDs: [UInt64]) {
+    pub var hasV3: Bool
+    init(momentIDs: [UInt64], saleMomentIDs: [UInt64], hasV3: Bool) {
       self.momentIDs = momentIDs
       self.saleMomentIDs = saleMomentIDs
+      self.hasV3 = hasV3!
     }
   }
   pub fun main(): TopshotAccount {
@@ -31,12 +33,20 @@ const getTopshotAccount = async (address) => {
                 .borrow<&{TopShot.MomentCollectionPublic}>()!
   let momentIDs = collectionRef.getIDs()
   var saleMomentIDs: [UInt64] = []
-  let salePublic = acct.getCapability(/public/topshotSaleCollection)
-  if salePublic!.check<&{Market.SalePublic}>(){
-    let saleCollectionRef = salePublic!.borrow<&{Market.SalePublic}>() ?? panic("Could not borrow capability from public collection")
-    saleMomentIDs = saleCollectionRef.getIDs()  
+  var hasV3: Bool = false
+  if let marketV3CollectionRef = acct.getCapability(/public/topshotSalev3Collection)
+                .borrow<&{Market.SalePublic}>() {
+     saleMomentIDs = marketV3CollectionRef.getIDs()
+     hasV3 = true
+  } else {
+     let salePublic = acct.getCapability(/public/topshotSaleCollection)
+     if salePublic!.check<&{Market.SalePublic}>(){
+      let saleCollectionRef = salePublic!.borrow<&{Market.SalePublic}>() ?? panic("Could not borrow capability from public collection")
+      saleMomentIDs = saleCollectionRef.getIDs()  
+     }
   }
-  return TopshotAccount(momentIDs: momentIDs, saleMomentIDs: saleMomentIDs)
+
+  return TopshotAccount(momentIDs: momentIDs, saleMomentIDs: saleMomentIDs, hasV3: hasV3)
 }  `,
   ])
   return fcl.decode(resp)
@@ -85,9 +95,13 @@ const getMoments = async (address, momentIDs) => {
   return fcl.decode(resp)
 }
 
-const getListings = async (address, saleMomentIDs) => {
+const getListings = async (address, saleMomentIDs, useV3) => {
   if (saleMomentIDs && saleMomentIDs.length === 0) {
     return []
+  }
+  var collectionPath = "topshotSaleCollection"
+  if (useV3) {
+    collectionPath = "topshotSalev3Collection"
   }
 
   const resp = await fcl.send([
@@ -120,7 +134,7 @@ const getListings = async (address, saleMomentIDs) => {
       
 		pub fun main(momentIDs: [UInt64]): [SaleMoment] {
 			let acct = getAccount(0x${address})
-            let collectionRef = acct.getCapability(/public/topshotSaleCollection)!.borrow<&{Market.SalePublic}>() ?? panic("Could not borrow capability from public collection")
+            let collectionRef = acct.getCapability(/public/${collectionPath})!.borrow<&{Market.SalePublic}>() ?? panic("Could not borrow capability from public collection")
             var saleMoments: [SaleMoment] = []
             for momentID in momentIDs {
               saleMoments.append(SaleMoment(moment: collectionRef.borrowMoment(id: momentID),price: collectionRef.getPrice(tokenID: momentID)!))
@@ -178,6 +192,7 @@ export function Account() {
   const [momentError, setMomentError] = useState(null)
   const [listingError, setListingError] = useState(null)
   const [topshotAccount, setTopShotAccount] = useState(null)
+  const [hasV3, setHasV3] = useState(null)
 
   const [momentIDs, setMomentIDs] = useState([])
   const [saleMomentIDs, setSaleMomentIDs] = useState([])
@@ -196,6 +211,7 @@ export function Account() {
         setMomentIDs(d.momentIDs.slice(0, 20))
         setSaleMomentIDs(d.saleMomentIDs.slice(0, 20))
         setDone(true)
+        setHasV3(d.hasV3)
       })
   }, [address])
 
@@ -205,7 +221,9 @@ export function Account() {
   }, [address, load])
 
   useEffect(() => {
-    getAccount(address).then(setAcct).catch(setError)
+    getAccount(address).then((a) => {
+      setAcct(a)
+    }).catch(setError)
   }, [address])
 
   const [moments, setMoments] = useState(null)
@@ -219,12 +237,12 @@ export function Account() {
 
   const [listings, setListings] = useState(null)
   useEffect(() => {
-    getListings(address, saleMomentIDs)
+    getListings(address, saleMomentIDs, topshotAccount ? topshotAccount.hasV3:false)
       .then((l) => {
         setListings(l)
       })
       .catch(setListingError)
-  }, [address, saleMomentIDs])
+  }, [address, saleMomentIDs, topshotAccount])
 
   // for reloading
   useEffect(() => {
@@ -413,7 +431,7 @@ export function Account() {
       </div>
       <div>
         <h3>
-          <span>Listings</span>
+          <span>Listings ({hasV3 ? "market v3" : "market v1"})</span>
           <Muted> {topshotAccount && topshotAccount.saleMomentIDs.length}</Muted>
           <Span>Search By ID:</Span>
           <Input type="text" onChange={handleSearchListingChange}/>
