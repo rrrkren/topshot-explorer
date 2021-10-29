@@ -36,8 +36,13 @@ const getTopshotOverview = async () => {
           self.totalSupply = TopShot.totalSupply
           var setID = UInt32(1)
           var sets: [Set] = []
+
           while setID < TopShot.nextSetID {
             var setName = TopShot.getSetName(setID: setID)
+            if setName == nil {
+              setID = setID + UInt32(1)
+              continue
+            }
             var series = TopShot.getSetSeries(setID: setID)
             sets.append(Set(id: setID, setName: setName!, series: series!))
             setID = setID + UInt32(1)

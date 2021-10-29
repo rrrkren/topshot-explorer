@@ -38,6 +38,10 @@ const getTopShot = async () => {
         var sets: [Set] = []
         while setID < TopShot.nextSetID {
           var setName = TopShot.getSetName(setID: setID)
+          if setName == nil {
+            setID = setID + UInt32(1)
+            continue
+          }
           sets.append(Set(id: setID, setName: setName!))
           setID = setID + UInt32(1)
         }
