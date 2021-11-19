@@ -17,12 +17,6 @@ const getTopShot = async () => {
         self.setName = setName
         self.playIDs = TopShot.getPlaysInSet(setID: id)!
         self.locked = TopShot.isSetLocked(setID: id)!
-        for playID in self.playIDs {
-          var retired = false
-          retired = TopShot.isEditionRetired(setID: id, playID: playID)!
-          var momentCount = UInt32(0)
-          momentCount = TopShot.getNumMomentsInEdition(setID: id, playID: playID)!
-        }
       }
     }
     pub struct TopShotData {

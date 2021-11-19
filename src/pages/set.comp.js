@@ -50,16 +50,20 @@ const getTopshotSet = async (setID) => {
         init(id: UInt32, setName: String) {
           self.id = id
           self.setName = setName
-          self.playIDs = TopShot.getPlaysInSet(setID: id)!
-          self.locked = TopShot.isSetLocked(setID: id)!
-          self.series = TopShot.getSetSeries(setID: id)!
+          var setData = TopShot.getSetData(setID: id)!
+          self.playIDs = setData.getPlays()
+          self.locked = setData.locked
+          self.series = setData.series
           var editions: [Edition] = []
           var playOrder = UInt32(1)
+
           for playID in self.playIDs {
             var retired = false
-            retired = TopShot.isEditionRetired(setID: id, playID: playID)!
+            var retiredEditions = setData.getRetired()
+            retired = retiredEditions[playID]!
             var momentCount = UInt32(0)
-            momentCount = TopShot.getNumMomentsInEdition(setID: id, playID: playID)!
+            var numberMintedPerPlay = setData.getNumberMintedPerPlay()
+            momentCount = numberMintedPerPlay[playID]!
             editions.append(Edition(playID: playID, retired: retired, momentCount: momentCount, playOrder: playOrder))
             playOrder = playOrder + UInt32(1)
           }
