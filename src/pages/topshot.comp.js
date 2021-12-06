@@ -98,11 +98,11 @@ export function TopShot() {
     <Root>
       <h3>
         <Muted>TopShot Contract: </Muted>
-        <span>0x0b2a3299cc857e29</span>
+        <span>{`0x${window.topshotAddress}`}</span>
       </h3>
       <h3>
         <Muted>TopShot Market Contract: </Muted>
-        <span>0xc1e4f4f4c4257510</span>
+        <span>{`0x${window.topshotMarketAddress}`}</span>
       </h3>
       <div>
         {topshotData && (
