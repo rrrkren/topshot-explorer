@@ -3,7 +3,7 @@ import ReactDOM from "react-dom"
 import * as fcl from "@onflow/fcl"
 import * as t from "@onflow/types"
 import {MainnetConfig} from "./config/mainnet-config.comp"
-// import {TestnetConfig} from "./config/testnet-config.comp"
+import {TestnetConfig} from "./config/testnet-config.comp"
 
 import {BrowserRouter as Router, Route, Switch} from "react-router-dom"
 
@@ -21,11 +21,11 @@ window.topshotAddress = ""
 window.topshotMarketAddress = ""
 
 const NoMatch = () => <div>route not found</div>
-
+const Config = process.env.NODE_ENV === 'production' ? MainnetConfig : TestnetConfig
 ReactDOM.render(
   <React.StrictMode>
     <Router>
-      <MainnetConfig></MainnetConfig>
+      <Config></Config>
       <TopShotNav></TopShotNav>
       <Switch>
         <Route exact path="/" component={TopShot} />
