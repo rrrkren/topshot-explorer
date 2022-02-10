@@ -30,6 +30,8 @@ const getTopShot = async () => {
         self.plays = TopShot.getAllPlays()
         var setID = UInt32(1)
         var sets: [Set] = []
+        self.sets = sets
+
         while setID < TopShot.nextSetID {
           var setName = TopShot.getSetName(setID: setID)
           if setName == nil {
@@ -62,7 +64,6 @@ const Muted = styled.span`
 
 export function TopShot() {
   const [error, setError] = useState(null)
-
   const [topshotData, setTopShotData] = useState(null)
   useEffect(() => {
     getTopShot()

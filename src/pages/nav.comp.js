@@ -36,6 +36,7 @@ const getTopshotOverview = async () => {
           self.totalSupply = TopShot.totalSupply
           var setID = UInt32(1)
           var sets: [Set] = []
+          self.sets = sets
 
           while setID < TopShot.nextSetID {
             var setName = TopShot.getSetName(setID: setID)
