@@ -22,7 +22,7 @@ const getTopShot = async () => {
     pub struct TopShotData {
       pub let totalSupply: UInt64
       pub let plays: [TopShot.Play]
-      pub let sets: [Set]
+      pub var sets: [Set]
       pub let currentSeries: UInt32
       init() {
         self.totalSupply = TopShot.totalSupply
