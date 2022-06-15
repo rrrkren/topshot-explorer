@@ -31,7 +31,7 @@ const getTopshotOverview = async () => {
       }
       pub struct TopshotOverview {
         pub let totalSupply: UInt64
-        pub let sets: [Set]
+        pub var sets: [Set]
         init() {
           self.totalSupply = TopShot.totalSupply
           var setID = UInt32(1)
