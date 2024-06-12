@@ -3,9 +3,31 @@ import * as fcl from "@onflow/fcl"
 import styled from "styled-components"
 import Prism from "prismjs"
 
-const getTopShot = async () => {
-  const resp = await fcl.send([
-    fcl.script`
+const getTopShotPlays = async () => {
+    const resp = await fcl.send([
+        fcl.script`
+    import TopShot from 0x${window.topshotAddress}
+    pub struct TopShotData {
+      pub let totalSupply: UInt64
+      pub let plays: [TopShot.Play]
+      pub let currentSeries: UInt32
+      init() {
+        self.totalSupply = TopShot.totalSupply
+        self.currentSeries = TopShot.currentSeries
+        self.plays = TopShot.getAllPlays()
+      }
+    }
+    pub fun main(): TopShotData {
+      return TopShotData()
+    } `,
+    ])
+    return fcl.decode(resp)
+
+}
+
+const getTopShotSets = async () => {
+    const resp = await fcl.send([
+        fcl.script`
     import TopShot from 0x${window.topshotAddress}
     pub struct Set {
       pub let id: UInt32
@@ -20,17 +42,12 @@ const getTopShot = async () => {
       }
     }
     pub struct TopShotData {
-      pub let totalSupply: UInt64
-      pub let plays: [TopShot.Play]
       pub var sets: [Set]
-      pub let currentSeries: UInt32
       init() {
-        self.totalSupply = TopShot.totalSupply
-        self.currentSeries = TopShot.currentSeries
-        self.plays = TopShot.getAllPlays()
-        var setID = UInt32(1)
         var sets: [Set] = []
         self.sets = sets
+        
+        var setID = UInt32(1)
 
         while setID < TopShot.nextSetID {
           var setName = TopShot.getSetName(setID: setID)
@@ -47,8 +64,15 @@ const getTopShot = async () => {
     pub fun main(): TopShotData {
       return TopShotData()
     } `,
-  ])
-  return fcl.decode(resp)
+    ])
+    return fcl.decode(resp)
+
+}
+
+const getTopShot = async () => {
+    const plays = await getTopShotPlays();
+    const sets = await getTopShotSets();
+    return {...plays, ...sets}
 }
 
 const Root = styled.div`
