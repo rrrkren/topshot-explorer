@@ -2,23 +2,7 @@ import React, {useState, useEffect} from "react"
 import * as fcl from "@onflow/fcl"
 import styled from "styled-components"
 import ReactDatatable from '@ashvin27/react-datatable'
-
-const getTopshotPlays = async () => {
-  const resp = await fcl.send([
-    fcl.script`
-    import TopShot from 0x${window.topshotAddress}
-    pub struct TopShotData {
-      pub let plays: [TopShot.Play]
-      init() {
-        self.plays = TopShot.getAllPlays()
-      }
-    }
-    pub fun main(): TopShotData {
-      return TopShotData()
-    } `,
-  ])
-  return fcl.decode(resp)
-}
+import {getTopShotPlays} from "../util/fetchPlays";
 
 const Root = styled.div`
   font-size: 13px;
@@ -94,22 +78,23 @@ export function TopshotPlays() {
   }, [])
 
   // for reloading
-  useEffect(() => {
-    if(done){
-      // set some delay
-      const timer = setTimeout(()=>{
-        load()
-        .catch((e)=>{
-          setDone(true) // enable reloading again for failed reload attempts
-        })
-      }, 5000)
-      return () => clearTimeout(timer);
-    }
-  }, [done]);
+    // disable auto refresh for now
+  // useEffect(() => {
+  //   if(done){
+  //     // set some delay
+  //     const timer = setTimeout(()=>{
+  //       load()
+  //       .catch((e)=>{
+  //         setDone(true) // enable reloading again for failed reload attempts
+  //       })
+  //     }, 5000)
+  //     return () => clearTimeout(timer);
+  //   }
+  // }, [done]);
 
   const load = () => {
     setDone(false)
-    return getTopshotPlays()
+    return getTopShotPlays()
       .then((d) => {
         console.log(d)
         setTopshotPlays(d)
