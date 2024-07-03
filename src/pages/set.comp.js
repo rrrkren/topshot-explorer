@@ -70,14 +70,29 @@ const getTopshotSet = async (setID) => {
           self.editions = editions
         }
       }
+  pub struct MyPlay {
+    pub let playID: UInt32
+    pub let metadata: {String:String}
+
+  init(playID: UInt32, metadata: {String:String}) {
+    self.playID = playID
+    self.metadata = metadata
+  }
+}
+
       pub struct TopshotSet {
         pub let set: Set
-        pub let plays: [TopShot.Play]
+        pub let plays: [MyPlay]
 
         init() {
             var setName = TopShot.getSetName(setID: ${setID})
             self.set = Set(id: ${setID}, setName: setName!)
-            self.plays = TopShot.getAllPlays()
+            let sd = TopShot.QuerySetData(setID:  ${setID})!
+            self.plays = []
+            for playID in sd.getPlays() {
+              let md = TopShot.getPlayMetaData(playID: playID)!
+              self.plays.append(MyPlay(playID: playID, metadata: md))
+            }
           }
       }
       pub fun main(): TopshotSet {

@@ -2,28 +2,7 @@ import React, {useState, useEffect} from "react"
 import * as fcl from "@onflow/fcl"
 import styled from "styled-components"
 import Prism from "prismjs"
-
-const getTopShotPlays = async () => {
-    const resp = await fcl.send([
-        fcl.script`
-    import TopShot from 0x${window.topshotAddress}
-    pub struct TopShotData {
-      pub let totalSupply: UInt64
-      pub let plays: [TopShot.Play]
-      pub let currentSeries: UInt32
-      init() {
-        self.totalSupply = TopShot.totalSupply
-        self.currentSeries = TopShot.currentSeries
-        self.plays = TopShot.getAllPlays()
-      }
-    }
-    pub fun main(): TopShotData {
-      return TopShotData()
-    } `,
-    ])
-    return fcl.decode(resp)
-
-}
+import {getTopShotPlays} from "../util/fetchPlays";
 
 const getTopShotSets = async () => {
     const resp = await fcl.send([
@@ -94,7 +73,7 @@ export function TopShot() {
       .then((d) => {
         setTopShotData(d)
       })
-      .catch(() => setError(true))
+      .catch((e) => setError(JSON.stringify(e)))
   }, [])
 
   const codeChange = (topshotData || {}).code || new Uint8Array()
