@@ -1,5 +1,4 @@
 import React, {useState, useEffect} from "react"
-import * as fcl from "@onflow/fcl"
 import styled from "styled-components"
 import ReactDatatable from '@ashvin27/react-datatable'
 import {getTopShotPlays} from "../util/fetchPlays";
@@ -67,7 +66,7 @@ export function TopshotPlays() {
   const [error, setError] = useState(null)
 
   // used to chek the reload, so another reload is not triggered while the previous is still running
-  const [done, setDone] = useState(false)
+  // const [done, setDone] = useState(false)
 
   const [manualReloadDone, setManualReloadDone] = useState(true)
 
@@ -93,12 +92,12 @@ export function TopshotPlays() {
   // }, [done]);
 
   const load = () => {
-    setDone(false)
+    // setDone(false)
     return getTopShotPlays()
       .then((d) => {
         console.log(d)
         setTopshotPlays(d)
-        setDone(true)
+        // setDone(true)
       })
   }
 
