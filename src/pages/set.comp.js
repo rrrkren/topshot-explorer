@@ -28,11 +28,11 @@ const getTopshotSet = async (setID) => {
   const resp = await fcl.send([
     fcl.script`
       import TopShot from 0x${window.topshotAddress}
-      pub struct Edition {
-        pub let playID: UInt32
-        pub let retired: Bool
-        pub let momentCount: UInt32
-        pub let playOrder: UInt32
+      access(all) struct Edition {
+        access(all) let playID: UInt32
+        access(all) let retired: Bool
+        access(all) let momentCount: UInt32
+        access(all) let playOrder: UInt32
         init(playID: UInt32, retired: Bool, momentCount: UInt32, playOrder: UInt32) {
           self.playID = playID
           self.retired = retired
@@ -40,13 +40,13 @@ const getTopshotSet = async (setID) => {
           self.playOrder = playOrder
         }
       }
-      pub struct Set {
-        pub let id: UInt32
-        pub let setName: String
-        pub let playIDs: [UInt32]
-        pub let editions: [Edition]
-        pub let locked: Bool
-        pub let series: UInt32
+      access(all) struct Set {
+        access(all) let id: UInt32
+        access(all) let setName: String
+        access(all) let playIDs: [UInt32]
+        access(all) let editions: [Edition]
+        access(all) let locked: Bool
+        access(all) let series: UInt32
         init(id: UInt32, setName: String) {
           self.id = id
           self.setName = setName
@@ -70,9 +70,9 @@ const getTopshotSet = async (setID) => {
           self.editions = editions
         }
       }
-  pub struct MyPlay {
-    pub let playID: UInt32
-    pub let metadata: {String:String}
+  access(all) struct MyPlay {
+    access(all) let playID: UInt32
+    access(all) let metadata: {String:String}
 
   init(playID: UInt32, metadata: {String:String}) {
     self.playID = playID
@@ -80,9 +80,9 @@ const getTopshotSet = async (setID) => {
   }
 }
 
-      pub struct TopshotSet {
-        pub let set: Set
-        pub let plays: [MyPlay]
+      access(all) struct TopshotSet {
+        access(all) let set: Set
+        access(all) let plays: [MyPlay]
 
         init() {
             var setName = TopShot.getSetName(setID: ${setID})
@@ -95,7 +95,7 @@ const getTopshotSet = async (setID) => {
             }
           }
       }
-      pub fun main(): TopshotSet {
+      access(all) fun main(): TopshotSet {
         return TopshotSet()
       } `,
   ])
@@ -193,7 +193,7 @@ export function TopshotSet() {
         })
       }, 5000)
       return () => clearTimeout(timer);
-    }    
+    }
   }, [done, load]);
 
   const handleManualReload = () => {
@@ -207,7 +207,7 @@ export function TopshotSet() {
       // Do we need to show them the error on manual reloadf?
       console.log(`An error occured while reloading err: ${err}`);
     })
-    
+
   }
 
   const getPlay = (playID) => {
@@ -235,7 +235,7 @@ export function TopshotSet() {
         </h3>
       </Root>
     )
-  
+
   const data = TopshotSet.set.editions?.map((edition) => {
     var play = getPlay(edition.playID)[0]
     return {playID: play.playID, retired: edition.retired ? <Red>retired</Red> : <Green>open</Green>, fullName: play.metadata.FullName,

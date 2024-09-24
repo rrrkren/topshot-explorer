@@ -8,11 +8,11 @@ const getTopShotSets = async () => {
     const resp = await fcl.send([
         fcl.script`
     import TopShot from 0x${window.topshotAddress}
-    pub struct Set {
-      pub let id: UInt32
-      pub let setName: String
-      pub let playIDs: [UInt32]
-      pub var locked: Bool
+    access(all) struct Set {
+      access(all) let id: UInt32
+      access(all) let setName: String
+      access(all) let playIDs: [UInt32]
+      access(all) var locked: Bool
       init(id: UInt32, setName: String) {
         self.id = id
         self.setName = setName
@@ -20,12 +20,12 @@ const getTopShotSets = async () => {
         self.locked = TopShot.isSetLocked(setID: id)!
       }
     }
-    pub struct TopShotData {
-      pub var sets: [Set]
+    access(all) struct TopShotData {
+      access(all) var sets: [Set]
       init() {
         var sets: [Set] = []
         self.sets = sets
-        
+
         var setID = UInt32(1)
 
         while setID < TopShot.nextSetID {
@@ -40,7 +40,7 @@ const getTopShotSets = async () => {
         self.sets = sets
       }
     }
-    pub fun main(): TopShotData {
+    access(all) fun main(): TopShotData {
       return TopShotData()
     } `,
     ])
@@ -128,7 +128,7 @@ export function TopShot() {
         <span role="img" aria-labelledby="heart">
           ❤️
         </span>{" "}
-        on <a href="https://www.onflow.org/" target="_blank" rel="noopener noreferrer">flow</a> 
+        on <a href="https://www.onflow.org/" target="_blank" rel="noopener noreferrer">flow</a>
         <br/>
         open sourced <a href="https://github.com/rrrkren/topshot-explorer" target="_blank" rel="noopener noreferrer">here</a>, PRs welcome!
       </p>

@@ -17,11 +17,11 @@ const getTopshotOverview = async () => {
   const resp = await fcl.send([
     fcl.script`
       import TopShot from 0x${window.topshotAddress}
-      pub struct Set {
-        pub let id: UInt32
-        pub let setName: String
-        pub var locked: Bool
-        pub let series: UInt32
+      access(all) struct Set {
+        access(all) let id: UInt32
+        access(all) let setName: String
+        access(all) var locked: Bool
+        access(all) let series: UInt32
         init(id: UInt32, setName: String, series: UInt32) {
           self.id = id
           self.setName = setName
@@ -29,9 +29,9 @@ const getTopshotOverview = async () => {
           self.locked = TopShot.isSetLocked(setID: id)!
         }
       }
-      pub struct TopshotOverview {
-        pub let totalSupply: UInt64
-        pub var sets: [Set]
+      access(all) struct TopshotOverview {
+        access(all) let totalSupply: UInt64
+        access(all) var sets: [Set]
         init() {
           self.totalSupply = TopShot.totalSupply
           var setID = UInt32(1)
@@ -51,7 +51,7 @@ const getTopshotOverview = async () => {
           self.sets = sets
         }
       }
-      pub fun main(): TopshotOverview {
+      access(all) fun main(): TopshotOverview {
         return TopshotOverview()
       } `,
   ])
@@ -86,7 +86,7 @@ export function TopShotNav() {
                 {sets.map((s) => {
                     return (
                       <NavDropdown.Item key={s.id} href={"/sets/" + s.id}>
-                        {s.id} {s.setName} S{s.series} {s.locked ? <Red>locked</Red> : <Green>open</Green>} 
+                        {s.id} {s.setName} S{s.series} {s.locked ? <Red>locked</Red> : <Green>open</Green>}
                       </NavDropdown.Item>
                     )
                   })}
@@ -100,7 +100,7 @@ export function TopShotNav() {
               topshotOverview.sets.map((s) => {
                 return (
                   <NavDropdown.Item key={s.id} href={"/sets/" + s.id}>
-                    {s.id} {s.setName} S{s.series} {s.locked ? <Red>locked</Red> : <Green>open</Green>} 
+                    {s.id} {s.setName} S{s.series} {s.locked ? <Red>locked</Red> : <Green>open</Green>}
                   </NavDropdown.Item>
                 )
               })}
