@@ -168,8 +168,8 @@ export function TopshotPlays() {
   topshotPlays.plays.forEach(play => {
     var metadata = play.metadata;
     for (let key in metadata) {
-      if (metadata[key] === "<invalid Value>") {
-        metadata[key] = "";
+      if (metadata[key] === '<invalid Value>') { // remove invalid on-chain values
+        metadata[key] = '';
       }
     }
 
@@ -184,8 +184,12 @@ export function TopshotPlays() {
       second: '2-digit'
     };
 
-    if (metadata.DateOfMoment !== '') {
+    if (metadata.DateOfMoment) {
       metadata.DateOfMomentLocal = new Date(metadata.DateOfMoment).toLocaleString(undefined, date_options);
+    }
+
+    if (metadata.Birthplace) { // fix inconsistent formatting of Birthplace
+      metadata.Birthplace = metadata.Birthplace.split(',').map(item => item.trim()).filter(item => item).join(', ');
     }
 
     metadata.Outcome = (metadata.HomeTeamName === metadata.TeamAtMoment)
