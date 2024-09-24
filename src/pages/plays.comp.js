@@ -168,9 +168,20 @@ export function TopshotPlays() {
   topshotPlays.plays.forEach(play => {
     var metadata = play.metadata;
     for (let key in metadata) {
-      if (metadata[key] === '<invalid Value>') { // remove invalid on-chain values
+      if (metadata[key] === '<invalid Value>' || metadata[key] === 'N/A') { // remove invalid on-chain values OR set N/A to empty for format consistency
         metadata[key] = '';
       }
+    }
+
+    const fix_keys = ['HomeTeamScore', 'AwayTeamScore', 'DraftYear', 'Weight'] // fix the associated value if equal to 0
+    fix_keys.forEach(key => {
+      if (parseInt(metadata[key]) === 0) {
+        metadata[key] = '';
+      }
+    });
+
+    if (metadata.Birthplace) { // fix inconsistent formatting of Birthplace
+      metadata.Birthplace = metadata.Birthplace.split(',').map(item => item.trim()).filter(item => item).join(', ');
     }
 
     metadata.playID = play.playID;
@@ -186,10 +197,6 @@ export function TopshotPlays() {
 
     if (metadata.DateOfMoment) {
       metadata.DateOfMomentLocal = new Date(metadata.DateOfMoment).toLocaleString(undefined, date_options);
-    }
-
-    if (metadata.Birthplace) { // fix inconsistent formatting of Birthplace
-      metadata.Birthplace = metadata.Birthplace.split(',').map(item => item.trim()).filter(item => item).join(', ');
     }
 
     metadata.Outcome = (metadata.HomeTeamName === metadata.TeamAtMoment)
