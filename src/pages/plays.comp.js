@@ -107,6 +107,14 @@ export function TopshotPlays() {
       </Root>
     )
 
+  var columns_found = { 'playID': true }; // add playID to columns found since it's in metadata
+  topshotPlays.plays.forEach(play => { // get all possible column keys (names) in metadata
+    for (var key in play.metadata) {
+      columns_found[key] = true;
+    }
+  });
+  columns_found = Object.keys(columns_found); // convert object to array, save only keys
+
   // preferred column order
   const columns_order = [
     'playID',
@@ -138,31 +146,16 @@ export function TopshotPlays() {
     'CurrentTeamID',
   ];
 
-  var columns_found = { 'playID': true }; // add playID to columns found since it's in metadata
-  topshotPlays.plays.forEach(play => { // get all possible column keys (names) in metadata
-    for (var key in play.metadata){
-      columns_found[key] = true;
-    }
-  });
-  var columns = Object.keys(columns_found); // save only keys, convert object to array
-
-  var columns_sorted = [];
-  columns_order.forEach(column_order => { // sort columns by columns_order
-    columns.forEach((column_key, idx) => {
-      if (column_key === column_order){
-        columns_sorted.push(column_key);
-        columns.splice(idx, 1); // remove from columns
-        return; // exit from loop
-      }
-    });
-  });
-  columns_sorted = columns_sorted.concat(columns); // append columns not found in columns_order to end of columns_sorted
+  const columns_extra = columns_found.filter(value => !columns_order.includes(value));
+  var columns_ordered = columns_order.concat(columns_extra); // append additional columns not initially found in columns_order
 
   var columns_exclude = ['LastName', 'FirstName', 'DateOfMoment', 'Tagline']; // columns to exclude
-  columns_sorted = columns_sorted.filter(item => !columns_exclude.includes(item));
+  columns_ordered = columns_ordered.filter(value => !columns_exclude.includes(value));
+
+  console.log(columns_ordered);
 
   var columns = [];
-  columns_sorted.forEach(column_key => {
+  columns_ordered.forEach(column_key => {
     columns.push({
       key: column_key,
       text: column_key,
@@ -191,7 +184,7 @@ export function TopshotPlays() {
       second: '2-digit'
     };
 
-    if (metadata.DateOfMoment != ''){
+    if (metadata.DateOfMoment !== '') {
       metadata.DateOfMomentLocal = new Date(metadata.DateOfMoment).toLocaleString(undefined, date_options);
     }
 
