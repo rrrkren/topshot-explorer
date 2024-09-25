@@ -17,33 +17,28 @@ const getTopshotAccount = async (address) => {
     fcl.script`
   import TopShot from 0x${window.topshotAddress}
   import Market from 0x${window.topshotMarketAddress}
-  pub struct TopshotAccount {
-    pub var momentIDs: [UInt64]
-    pub var saleMomentIDs: [UInt64]
-    pub var hasV3: Bool
+  access(all) struct TopshotAccount {
+    access(all) var momentIDs: [UInt64]
+    access(all) var saleMomentIDs: [UInt64]
+    access(all) var hasV3: Bool
     init(momentIDs: [UInt64], saleMomentIDs: [UInt64], hasV3: Bool) {
       self.momentIDs = momentIDs
       self.saleMomentIDs = saleMomentIDs
       self.hasV3 = hasV3!
     }
   }
-  pub fun main(): TopshotAccount {
+  access(all) fun main(): TopshotAccount {
   let acct = getAccount(0x${address})
-  let collectionRef = acct.getCapability(/public/MomentCollection)!
-                .borrow<&{TopShot.MomentCollectionPublic}>()!
+  let collectionRef = acct.capabilities.borrow<&{TopShot.MomentCollectionPublic}>(/public/MomentCollection)!
   let momentIDs = collectionRef.getIDs()
   var saleMomentIDs: [UInt64] = []
   var hasV3: Bool = false
-  if let marketV3CollectionRef = acct.getCapability(/public/topshotSalev3Collection)
-                .borrow<&{Market.SalePublic}>() {
-     saleMomentIDs = marketV3CollectionRef.getIDs()
-     hasV3 = true
+  if let marketV3CollectionRef = acct.capabilities.borrow<&{Market.SalePublic}>(/public/topshotSalev3Collection) {
+    saleMomentIDs = marketV3CollectionRef.getIDs()
+    hasV3 = true
   } else {
-     let salePublic = acct.getCapability(/public/topshotSaleCollection)
-     if salePublic!.check<&{Market.SalePublic}>(){
-      let saleCollectionRef = salePublic!.borrow<&{Market.SalePublic}>() ?? panic("Could not borrow capability from public collection")
-      saleMomentIDs = saleCollectionRef.getIDs()  
-     }
+    let saleCollectionRef = acct.capabilities.borrow<&{Market.SalePublic}>(/public/topshotSaleCollection) ?? panic("Could not borrow capability from public collection")
+    saleMomentIDs = saleCollectionRef.getIDs()
   }
 
   return TopshotAccount(momentIDs: momentIDs, saleMomentIDs: saleMomentIDs, hasV3: hasV3)
@@ -59,14 +54,14 @@ const getMoments = async (address, momentIDs) => {
   const resp = await fcl.send([
     fcl.script`
   import TopShot from 0x${window.topshotAddress}
-  pub struct Moment {
-    pub var id: UInt64?
-    pub var playId: UInt32?
-    pub var meta: TopShot.MomentData?
-    pub var play: {String: String}?
-    pub var setId: UInt32?
-    pub var setName: String?
-    pub var serialNumber: UInt32?
+  access(all) struct Moment {
+    access(all) var id: UInt64?
+    access(all) var playId: UInt32?
+    access(all) var meta: &TopShot.MomentData?
+    access(all) var play: {String: String}?
+    access(all) var setId: UInt32?
+    access(all) var setName: String?
+    access(all) var serialNumber: UInt32?
     init(_ moment: &TopShot.NFT?) {
       self.id = moment?.id
       self.meta = moment?.data
@@ -80,13 +75,13 @@ const getMoments = async (address, momentIDs) => {
       self.serialNumber = moment?.data?.serialNumber
     }
   }
-  pub fun main(momentIDs: [UInt64]): [Moment] {
-  let acct = getAccount(0x${address})
-  let collectionRef = acct.getCapability(/public/MomentCollection)!
-                .borrow<&{TopShot.MomentCollectionPublic}>()!
+  access(all) fun main(momentIDs: [UInt64]): [Moment] {
+    let acct = getAccount(0x${address})
     var moments: [Moment] = []
-    for momentID in momentIDs {
-      moments.append(Moment(collectionRef.borrowMoment(id: momentID)))
+    if let collectionRef = acct.capabilities.borrow<&{TopShot.MomentCollectionPublic}>(/public/MomentCollection) {
+      for momentID in momentIDs {
+        moments.append(Moment(collectionRef.borrowMoment(id: momentID)))
+      }
     }
     return moments
 }  `,
@@ -108,15 +103,15 @@ const getListings = async (address, saleMomentIDs, useV3) => {
     fcl.script`
         import TopShot from 0x${window.topshotAddress}
         import Market from 0x${window.topshotMarketAddress}
-        pub struct SaleMoment {
-          pub var id: UInt64?
-          pub var playId: UInt32?
-          pub var meta: TopShot.MomentData?
-          pub var play: {String: String}?
-          pub var setId: UInt32?
-          pub var setName: String?
-          pub var serialNumber: UInt32?
-          pub var price: UFix64
+        access(all) struct SaleMoment {
+          access(all) var id: UInt64?
+          access(all) var playId: UInt32?
+          access(all) var meta: &TopShot.MomentData?
+          access(all) var play: {String: String}?
+          access(all) var setId: UInt32?
+          access(all) var setName: String?
+          access(all) var serialNumber: UInt32?
+          access(all) var price: UFix64
           init(moment: &TopShot.NFT?, price: UFix64) {
             self.id = moment?.id
             self.meta = moment?.data
@@ -131,10 +126,10 @@ const getListings = async (address, saleMomentIDs, useV3) => {
             self.price = price
           }
         }
-      
-		pub fun main(momentIDs: [UInt64]): [SaleMoment] {
+
+		access(all) fun main(momentIDs: [UInt64]): [SaleMoment] {
 			let acct = getAccount(0x${address})
-            let collectionRef = acct.getCapability(/public/${collectionPath})!.borrow<&{Market.SalePublic}>() ?? panic("Could not borrow capability from public collection")
+            let collectionRef = acct.capabilities.borrow<&{Market.SalePublic}>(/public/${collectionPath}) ?? panic("Could not borrow capability from public collection")
             var saleMoments: [SaleMoment] = []
             for momentID in momentIDs {
               saleMoments.append(SaleMoment(moment: collectionRef.borrowMoment(id: momentID),price: collectionRef.getPrice(tokenID: momentID)!))
@@ -328,7 +323,7 @@ export function Account() {
     setSaleMomentIDs([value])
   }
 
-  
+
   if (error != null)
     return (
       <Root>

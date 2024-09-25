@@ -10,21 +10,21 @@ const getTopShotPlays = async () => {
         const resp = await fcl.send([
             fcl.script`
     import TopShot from 0x${window.topshotAddress}
-pub struct MyPlay {
-  pub let playID: UInt32
-  pub let metadata: {String:String}
+access(all) struct MyPlay {
+  access(all) let playID: UInt32
+  access(all) let metadata: {String:String}
 
   init(playID: UInt32, metadata: {String:String}) {
     self.playID = playID
     self.metadata = metadata
   }
 }
-pub struct TopShotData {
-  pub let totalSupply: UInt64
-  pub let plays: [MyPlay]
-  pub let currentSeries: UInt32
-  pub var lastPlayFetched: Bool
-  pub let nextPlayID: UInt32
+access(all) struct TopShotData {
+  access(all) let totalSupply: UInt64
+  access(all) let plays: [MyPlay]
+  access(all) let currentSeries: UInt32
+  access(all) var lastPlayFetched: Bool
+  access(all) let nextPlayID: UInt32
   init() {
     self.totalSupply = TopShot.totalSupply
     self.currentSeries = TopShot.currentSeries
@@ -32,14 +32,14 @@ pub struct TopShotData {
     self.lastPlayFetched= false
     self.nextPlayID = TopShot.nextPlayID
   }
-  pub fun addPlay(p: MyPlay) {
+  access(all) fun addPlay(p: MyPlay) {
     self.plays.append(p)
     if TopShot.nextPlayID-1 == p.playID {
       self.lastPlayFetched = true
     }
   }
 }
-pub fun main(start: UInt32, end: UInt32): TopShotData {
+access(all) fun main(start: UInt32, end: UInt32): TopShotData {
   let ts = TopShotData()
   var i = start
   while i < end {

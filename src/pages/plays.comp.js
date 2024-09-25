@@ -23,40 +23,9 @@ const Button = styled.button`
   border-width: 1px;
 `
 
-const columns = [
-  {
-      key: "playID",
-      text: "Play ID",
-      align: "left",
-      sortable: true,
-  },
-  {
-      key: "fullName",
-      text: "Full Name",
-      align: "left",
-      sortable: true
-  },
-  {
-      key: "playType",
-      text: "Play Type",
-      sortable: true
-  },
-  {
-      key: "playCategory",
-      text: "Play Category",
-      sortable: true
-  },
-  {
-      key: "teamAtMoment",
-      text: "Team at Moment",
-      align: "left",
-      sortable: true
-  },
-];
-
 const config = {
-  page_size: 10,
-  length_menu: [ 10, 20, 50 ],
+  page_size: 100,
+  length_menu: [ 100, 500, 1000 ],
   no_data_text: 'No data available!',
   sort: { column: "playID", order: "desc" },
   key_column: "playID"
@@ -112,9 +81,9 @@ export function TopshotPlays() {
       // Do we need to show them the error on manual reloadf?
       console.log(`An error occured while reloading err: ${err}`);
     })
-    
+
   }
-  
+
   if (error != null)
     return (
       <Root>
@@ -138,10 +107,104 @@ export function TopshotPlays() {
       </Root>
     )
 
-  const data = topshotPlays.plays?.map((play) => {
-    return {playID: play.playID, fullName: play.metadata.FullName,
-      playType: play.metadata.PlayType, playCategory: play.metadata.PlayCategory, teamAtMoment: play.metadata.TeamAtMoment}
-  })
+  var columns_found = { 'playID': true }; // add playID to columns found since it's in metadata
+  topshotPlays.plays.forEach(play => { // get all possible column keys (names) in metadata
+    for (var key in play.metadata) {
+      columns_found[key] = true;
+    }
+  });
+  columns_found = Object.keys(columns_found); // convert object to array, save only keys
+
+  // preferred column order
+  const columns_order = [
+    'playID',
+    'FullName',
+    'DateOfMomentLocal',
+    'PlayType',
+    'PlayCategory',
+    'TeamAtMoment',
+    'TeamAtMomentNBAID',
+    'HomeTeamName', // game details
+    'HomeTeamScore',
+    'AwayTeamName',
+    'AwayTeamScore',
+    'Outcome',
+    'NbaSeason',
+    'TotalYearsExperience',
+    'PrimaryPosition', // play (info specific to play or point in time)
+    'PlayerPosition',
+    'JerseyNumber',
+    'DraftYear',
+    'DraftRound',
+    'DraftSelection',
+    'DraftTeam',
+    'Birthdate',
+    'Birthplace',
+    'Height',
+    'Weight',
+    'CurrentTeam', // optional and infrequent
+    'CurrentTeamID',
+  ];
+
+  const columns_extra = columns_found.filter(value => !columns_order.includes(value));
+  var columns_ordered = columns_order.concat(columns_extra); // append additional columns not initially found in columns_order
+
+  var columns_exclude = ['LastName', 'FirstName', 'DateOfMoment', 'Tagline']; // columns to exclude
+  columns_ordered = columns_ordered.filter(value => !columns_exclude.includes(value));
+
+  console.log(columns_ordered);
+
+  var columns = [];
+  columns_ordered.forEach(column_key => {
+    columns.push({
+      key: column_key,
+      text: column_key,
+      align: "left",
+      sortable: true
+    });
+  });
+
+  var data = [];
+  topshotPlays.plays.forEach(play => {
+    var metadata = play.metadata;
+    for (let key in metadata) {
+      if (metadata[key] === '<invalid Value>' || metadata[key] === 'N/A') { // remove invalid on-chain values OR set N/A to empty for format consistency
+        metadata[key] = '';
+      }
+    }
+
+    const fix_keys = ['HomeTeamScore', 'AwayTeamScore', 'DraftYear', 'Weight'] // fix the associated value if equal to 0
+    fix_keys.forEach(key => {
+      if (parseInt(metadata[key]) === 0) {
+        metadata[key] = '';
+      }
+    });
+
+    if (metadata.Birthplace) { // fix inconsistent formatting of Birthplace
+      metadata.Birthplace = metadata.Birthplace.split(',').map(item => item.trim()).filter(item => item).join(', ');
+    }
+
+    metadata.playID = play.playID;
+
+    let date_options = {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    };
+
+    if (metadata.DateOfMoment) {
+      metadata.DateOfMomentLocal = new Date(metadata.DateOfMoment).toLocaleString(undefined, date_options);
+    }
+
+    metadata.Outcome = (metadata.HomeTeamName === metadata.TeamAtMoment)
+    ? (parseInt(metadata.HomeTeamScore) > parseInt(metadata.AwayTeamScore) ? 'Home Win' : 'Home Loss')
+    : (parseInt(metadata.HomeTeamScore) > parseInt(metadata.AwayTeamScore) ? 'Away Loss' : 'Away Win');
+
+    data.push(metadata);
+  });
 
   return (
     <Root>
